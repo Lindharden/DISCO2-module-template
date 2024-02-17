@@ -12,7 +12,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
 
     float flip_percent = get_param_float(config, "flip_percent");
     int flip_height = (int)(input_batch->height * flip_percent);
-    // int flip_amount = get_param_int(config, "flip_amount");
+    int flip_amount = get_param_int(config, "flip_amount");
 
     // Calculate the size of the entire batch
     int data_size = input_batch->width * input_batch->height * input_batch->channels * input_batch->num_images;

@@ -34,7 +34,7 @@ void load_image(const char *filename, ImageBatch *batch)
     memcpy(batch->data, image_data, image_size);
 }
 
-ModuleConfig module_configurations()
+ModuleConfig* module_configurations()
 {
     ModuleConfig flip_config = MODULE_CONFIG__INIT;
     ConfigParameter flip_percent = CONFIG_PARAMETER__INIT;
@@ -49,7 +49,11 @@ ModuleConfig module_configurations()
     flip_config.n_parameters = 2;
     flip_config.parameters[0] = &flip_percent;
     flip_config.parameters[1] = &flip_amount;
-    return flip_config;
+    size_t lenConfig = module_config__get_packed_size(&flip_config);
+    uint8_t bufConfig[lenConfig];
+    module_config__pack(&flip_config, bufConfig);
+    ModuleConfig *unpacked_config = module_config__unpack(NULL, lenConfig, bufConfig);
+    return unpacked_config;
 }
 
 int main()
@@ -57,11 +61,12 @@ int main()
     ImageBatch batch;
     load_image(FILENAME_INPUT, &batch);
 
-    ModuleConfig config = module_configurations();
-    ImageBatch result = run(&batch, &config);
+    ModuleConfig* config = module_configurations();
+    
+    ImageBatch result = run(&batch, config);
 
     save_image(FILENAME_OUTPUT, &result);
-    free(config.parameters);
+    free(config->parameters);
     free(result.data);
     return 0;
 }
