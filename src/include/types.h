@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "module_config.pb-c.h"
 
 typedef struct ImageBatch {
