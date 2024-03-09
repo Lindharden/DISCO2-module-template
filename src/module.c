@@ -1,5 +1,6 @@
 #include "module.h"
 #include "config_util.h"
+#include "memory_util.h"
 
 ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
     ImageBatch mirrored_batch;
@@ -45,8 +46,8 @@ ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
     }
     
     mirrored_batch.data = new_data;
-
-    free(input_batch->data);
+    
+    finalize(&mirrored_batch, input_batch);
 
     return mirrored_batch;
 }

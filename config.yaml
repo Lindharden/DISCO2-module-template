@@ -1,0 +1,21 @@
+# Use following keys for type  #
+#   bool    = 2                #
+#   int     = 3                #
+#   float   = 4                #
+#   string  = 5                #
+
+- name: param_name_1
+  type: 2
+  value: true
+
+- name: param_name_2
+  type: 3
+  value: 256
+
+- name: param_name_3
+  type: 4
+  value: 3.1415
+
+- name: param_name_4
+  type: 5
+  value: DISCO
