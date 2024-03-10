@@ -1,17 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "module_config.pb-c.h"
+#include "util.h"
 
 // GENERIC PROTOBUF UTIL FUNCTIONS //
 
-/**
- * Search the module configuration and fetch parameter 
- * with specified name.
- *
- * @param config Pointer to the module configuration
- * @param name Name of the desired parameter
- */
 static ConfigParameter *get_param(ModuleConfig *config, const char *name) {
     // find parameter
     ConfigParameter *found_parameter = NULL;
@@ -26,14 +16,6 @@ static ConfigParameter *get_param(ModuleConfig *config, const char *name) {
     return found_parameter;
 }
 
-/**
- * Fetch float parameter from module configuration.
- *
- * @param config Pointer to the module configuration
- * @param name Name of the desired parameter
- * 
- * @return float value of parameter
- */
 float get_param_float(ModuleConfig *config, const char *name)
 {   
     ConfigParameter *found_parameter = get_param(config, name);
@@ -47,14 +29,6 @@ float get_param_float(ModuleConfig *config, const char *name)
     return found_parameter->float_value;
 }
 
-/**
- * Fetch integer parameter from module configuration.
- *
- * @param config Pointer to the module configuration
- * @param name Name of the desired parameter
- *
- * @return int value of parameter
- */
 int get_param_int(ModuleConfig *config, const char *name)
 {   
     ConfigParameter *found_parameter = get_param(config, name);
@@ -68,14 +42,6 @@ int get_param_int(ModuleConfig *config, const char *name)
     return found_parameter->int_value;
 }
 
-/**
- * Fetch boolean parameter from module configuration.
- *
- * @param config Pointer to the module configuration
- * @param name Name of the desired parameter
- * 
- * @return bool value of parameter as integer (0, 1)
- */
 int get_param_bool(ModuleConfig *config, const char *name)
 {   
     ConfigParameter *found_parameter = get_param(config, name);
@@ -89,14 +55,6 @@ int get_param_bool(ModuleConfig *config, const char *name)
     return found_parameter->bool_value;
 }
 
-/**
- * Fetch string parameter from module configuration.
- *
- * @param config Pointer to the module configuration
- * @param name Name of the desired parameter
- *
- * @return string value of parameter
- */
 char *get_param_string(ModuleConfig *config, const char *name)
 {   
     ConfigParameter *found_parameter = get_param(config, name);

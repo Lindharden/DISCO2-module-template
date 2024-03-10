@@ -6,7 +6,7 @@
 #define PROTOBUF_C__NO_DEPRECATED
 #endif
 
-#include "include/module_config.pb-c.h"
+#include "module_config.pb-c.h"
 void   config_parameter__init
                      (ConfigParameter         *message)
 {
