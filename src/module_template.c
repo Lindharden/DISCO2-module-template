@@ -1,14 +1,7 @@
 #include "module.h"
-#include "config_util.h"
-#include "memory_util.h"
+#include "util.h"
 
-/**
- * Module main function. 
- * Will be called from parent process.
- *
- * @param input_batch Input image batch data.
- * @param config Configuration parameter values.
- */
+/* Main function of module */
 ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
 
     /* Create a result batch, replace with expected dimensions */
