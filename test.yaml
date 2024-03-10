@@ -1,0 +1,13 @@
+# Use following keys for type  #
+#   bool    = 2                #
+#   int     = 3                #
+#   float   = 4                #
+#   string  = 5                #
+
+- key: "flip_percent"
+  type: 4
+  value: 0.50
+
+- key: "flip_amount"
+  type: 3
+  value: 1

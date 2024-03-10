@@ -8,7 +8,7 @@
 
 #define FILENAME_INPUT "input.png"
 #define FILENAME_OUTPUT "output.png"
-#define FILENAME_CONFIG "config.yaml"
+#define FILENAME_CONFIG "test.yaml"
 
 void save_image(const char *filename, const ImageBatch *batch)
 {
