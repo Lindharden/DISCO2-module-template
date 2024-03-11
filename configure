@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Check if the number of arguments is exactly 1
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 [build|test]"
+    exit 1
+fi
+
+# Define the default value for cross-compile option
+cross_compile_value="false"
+
+# Check if the argument is 'build' or 'test'
+if [ "$1" = "build" ]; then
+    echo "Building shared object files..."
+    cross_compile_value="true"
+elif [ "$1" = "test" ]; then
+    echo "Building test files..."
+else
+    echo "Invalid argument. Expected 'build' or 'test'."
+    exit 1
+fi
+
+# Write the option to meson_options.txt
+echo "option('cross-compile', type : 'boolean', value : $cross_compile_value, description : 'Determine whether to cross-compile to AArch64')" > meson_options.txt
+
+# Clean and setup the build directory
+rm -rf builddir
+if $cross_compile_value = "true"; then
+    meson setup builddir --cross-file linux-aarch64.txt
+else 
+    meson setup . builddir
+fi
+
+# Navigate to the build directory and build the project
+cd builddir
+ninja
+cd ..
+
+exit 0

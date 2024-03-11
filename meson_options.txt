@@ -1,0 +1,1 @@
+option('cross-compile', type : 'boolean', value : false, description : 'Determine whether to cross-compile to AArch64')

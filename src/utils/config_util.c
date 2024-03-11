@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "module_config.pb-c.h"
+#include "util.h"
 
 // GENERIC PROTOBUF UTIL FUNCTIONS //
 
-ConfigParameter *get_param(ModuleConfig *config, const char *name) {
+static ConfigParameter *get_param(ModuleConfig *config, const char *name) {
     // find parameter
     ConfigParameter *found_parameter = NULL;
     for (size_t i = 0; i < config->n_parameters; i++)
