@@ -18,7 +18,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
     char *param_4 = get_param_string(config, "param_name_4");
 
     /* Allocate memory for resulting image data, fit to expected output size */
-    int data_size = input_batch->width * input_batch->height * input_batch->channels * input_batch->num_images;
+    int data_size = result_batch.width * result_batch.height * result_batch.channels * result_batch.num_images;
     unsigned char *new_data = (unsigned char *)malloc(data_size);
     result_batch.data = new_data;
 
@@ -44,7 +44,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
     }
     
     /* Finalize the module job (MUST BE HERE!) */
-    finalize(&result_batch, input_batch);
+    finalize(input_batch, &result_batch);
 
     return result_batch;
 }
