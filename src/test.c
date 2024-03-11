@@ -7,7 +7,7 @@
 
 #define FILENAME_INPUT "input.png"
 #define FILENAME_OUTPUT "output.png"
-#define FILENAME_CONFIG "test.yaml"
+#define FILENAME_CONFIG "config.yaml"
 
 void save_images(const char *filename_base, const ImageBatch *batch)
 {
@@ -50,7 +50,7 @@ int main()
     ImageBatch batch;
     load_image(FILENAME_INPUT, &batch);
 
-	ModuleConfig config = MODULE_CONFIG__INIT;
+	ModuleConfig config;
 	if (parse_module_yaml_file(FILENAME_CONFIG, &config) < 0)
 		return -1;
     

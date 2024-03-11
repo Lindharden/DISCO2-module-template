@@ -1,7 +1,7 @@
 #include <yaml.h>
 #include <errno.h>
 #include <math.h>
-#include "module_config.pb-c.h"
+#include "types.h"
 
 /**
  * Parse contents of yaml file into ModuleConfig.

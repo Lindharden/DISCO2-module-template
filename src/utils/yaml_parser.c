@@ -1,4 +1,5 @@
 #include "yaml_parser.h"
+#include <limits.h>
 
 static int initialize_parser(const char *filename, yaml_parser_t *parser, FILE *fh)
 {
@@ -129,7 +130,7 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
                 params = temp;
 
                 // Fill in the new struct
-                ConfigParameter param = CONFIG_PARAMETER__INIT;
+                ConfigParameter param;
                 params[param_idx] = param;
 
                 param_count++;
