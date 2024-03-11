@@ -30,7 +30,7 @@ typedef struct ImageBatch {
 } ImageBatch;
 ```
 
-The `ImageBatch` struct contains metadata about the batch of images it contains (such as height, width and channels), and about the shared memory space and which pipeline should be utilized (not important for development). The image data from all the individual images in the batch are stored sequentially in the `data` field. Because of this it will be nescesary to iterate over multiple images in the `data` field using the `num_images` field as an indicator for how many images are present in the data.
+The `ImageBatch` struct contains metadata about the batch of images it contains (such as height, width and channels), and about the shared memory space and which pipeline should be utilized (not important for development). The image data from all the individual images in the batch are stored sequentially in the `data` field. Because of this it will be necessary to iterate over multiple images in the `data` field using the `num_images` field as an indicator for how many images are present in the data.
 
 When the image batch has been processed, the `finalize` function must be called, in order to copy the new image data to memory. The `finalize` function can be called like this:
 ```c
@@ -78,7 +78,7 @@ char *param_4 = get_param_string(config, "param_name_4");
 
 ## Adding External Dependencies
 
-The modules support external dependencies. These will simply be compiled with the shared object library itself. To add external dependencies, you must add them in the `meson.build` file, just like the already existing dependencies:
+The modules support external dependencies. These will be compiled with the shared object library itself. To add external dependencies, you must add them in the `meson.build` file, just like the already existing dependencies:
 
 ```meson
 proto_c_dep = dependency('libprotobuf-c', fallback: ['protobuf-c', 'proto_c_dep'])
@@ -90,26 +90,23 @@ deps = [m_dep, proto_c_dep, ...]
 
 ## Building the Module
 
-To build the module, run the following commands:
+To build the module, run the `configure` script with either `build` or `test` as argument, as following (using build):
 ```sh
-meson setup . builddir
-cd builddir
-ninja 
+./configure build
 ```
 
-Or simply execute the `configure` script like this:
-```bash
-./configure
-```
+Use `build` when you want to cross-compile to AArch64, and use `test` if you want to compile to your current machine for testing purposes.
 
-When building, several files will be constructed in the `builddir` directory. The files of interest are:
+Compiling with the `test` argument will produce the following files in the `builddir` directory:
  - `*project_name*-exec`       | Can be executed to test the module (Will not utilize shared memory for the sake of simplicity).
- - `*project_name*.so`         | Shared Oject library for use on host machines.  
- - `*project_name*-aarch64.so` | Shared Oject library for use on `AArch64` machines.  
+ - `*project_name*.so`         | Shared Oject library for use on the host architecture.
+
+Compiling with the `build` argument will produce the following files in the `builddir` directory:
+ - `*project_name*.so`         | Shared Oject library for use on AArch64 machines.
 
 ## Testing the Module
 
-In order to test, and potentially debug, the module, you must first compile the module as described previously. This will produce the executable `*project_name*-exec` located in the `builddir` directory. This executable is able to be run using a debugger, but must be called from the workspace root. For `launch.json` in vscode, the program field should have value:
+In order to test and debug the module, you must first compile the module as previously described. This will produce the executable `*project_name*-exec` located in the `builddir` directory. This executable is able to be run using a debugger, but must be called from the workspace root. For `launch.json` in vscode, the program field should have value:
 ```json
 "program": "${workspaceFolder}/builddir/example-exec"
 ```

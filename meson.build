@@ -26,13 +26,17 @@ shared_library(project_name, sources,
     c_args: cflags + ['-DSHARED_MEMORY=1']
 )
 
-sources += 'src/test.c'
-sources += 'src/utils/yaml_parser.c'
-deps = [libyaml_dep, m_dep]
+# Check whether we are cross-compiling or not
+if not get_option('cross-compile')
+    # If not cross-compiling, include the executable target
+    sources += 'src/test.c'
+    sources += 'src/utils/yaml_parser.c'
+    deps = [libyaml_dep, m_dep]
 
-# Executable
-executable(project_name + '-exec', sources,
-    include_directories: dirs,
-    c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-    dependencies: deps
-)
+    # Executable
+    executable(project_name + '-exec', sources,
+        include_directories: dirs,
+        c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
+        dependencies: deps
+    )
+endif
