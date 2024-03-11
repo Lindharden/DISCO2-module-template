@@ -41,11 +41,11 @@ void finalize(ImageBatch *input_batch, ImageBatch *result_batch) {
 
         // Detach and free old shared memory segment
         if (shmdt(input_batch->data) == -1) {
-            fprintf(stderr, "Error detaching old shared memory: %s\n");
+            fprintf(stderr, "Error detaching old shared memory\n");
             exit(EXIT_FAILURE);
         }
         if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-            fprintf(stderr, "Error removing old shared memory: %s\n");
+            fprintf(stderr, "Error removing old shared memory\n");
             exit(EXIT_FAILURE);
         }
     } else {
