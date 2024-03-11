@@ -1,9 +1,6 @@
-#include <yaml.h>
-#include <errno.h>
-#include <math.h>
-#include "module_config.pb-c.h"
+#include "yaml_parser.h"
 
-int initialize_parser(const char *filename, yaml_parser_t *parser, FILE *fh)
+static int initialize_parser(const char *filename, yaml_parser_t *parser, FILE *fh)
 {
     fh = fopen(filename, "r");
 
@@ -25,7 +22,7 @@ int initialize_parser(const char *filename, yaml_parser_t *parser, FILE *fh)
     return 0;
 }
 
-void cleanup_resources(yaml_parser_t *parser, yaml_event_t *event, FILE *fh)
+static void cleanup_resources(yaml_parser_t *parser, yaml_event_t *event, FILE *fh)
 {
     if (event != NULL)
     {
@@ -39,7 +36,7 @@ void cleanup_resources(yaml_parser_t *parser, yaml_event_t *event, FILE *fh)
     }
 }
 
-int safe_atof(const char *in, float *out)
+static int safe_atof(const char *in, float *out)
 {
     errno = 0; // To detect overflow or underflow
     char *endptr;
@@ -66,7 +63,7 @@ int safe_atof(const char *in, float *out)
     return 0;
 }
 
-int safe_atoi(const char *in, int *out)
+static int safe_atoi(const char *in, int *out)
 {
     errno = 0; // To detect overflow
     char *endptr;

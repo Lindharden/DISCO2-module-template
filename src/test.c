@@ -3,7 +3,7 @@
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-#include "utils/yaml.c"
+#include "yaml_parser.h"
 
 #define FILENAME_INPUT "input.png"
 #define FILENAME_OUTPUT "output.png"
