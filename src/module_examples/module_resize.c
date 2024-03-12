@@ -1,7 +1,7 @@
 #include "module.h"
 #include "util.h"
 
-ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     ImageBatch result_batch;
     // Correctly set the dimensions for the resized images
     result_batch.width = input_batch->width * 2;

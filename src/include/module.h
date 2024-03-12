@@ -9,4 +9,4 @@
  * 
  * @return resulting image batch
  */
-ImageBatch run(ImageBatch *input_batch, ModuleConfig *config);
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config);

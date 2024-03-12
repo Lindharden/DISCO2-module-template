@@ -95,7 +95,7 @@ static int safe_atoi(const char *in, int *out)
     return 0;
 }
 
-int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
+int parse_module_yaml_file(const char *filename, ModuleParameterList *module_parameter_list)
 {
     yaml_parser_t parser;
     FILE *fh = NULL;
@@ -103,7 +103,7 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
         return -1;
 
     /* Module definitions */
-    ConfigParameter *params = NULL;
+    ModuleParameter *params = NULL;
     int param_idx = -1;  // current module index
     int param_count = 0; // find total amount of modules
 
@@ -121,16 +121,16 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
             case YAML_MAPPING_START_EVENT:
                 // New Dash
                 param_idx++;
-                ConfigParameter *temp = realloc(params, (param_count + 1) * sizeof(ConfigParameter));
+                ModuleParameter *temp = realloc(params, (param_count + 1) * sizeof(ModuleParameter));
                 if (!temp)
                 {
-                    fprintf(stderr, "Error: Failed to allocate memory for ConfigParameter during parsing\n");
+                    fprintf(stderr, "Error: Failed to allocate memory for ModuleParameter during parsing\n");
                     return -1;
                 }
                 params = temp;
 
                 // Fill in the new struct
-                ConfigParameter param;
+                ModuleParameter param;
                 params[param_idx] = param;
 
                 param_count++;
@@ -161,7 +161,7 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
                         break;
                     switch (params[param_idx].value_case)
                     {
-                        case CONFIG_PARAMETER__VALUE_BOOL_VALUE:
+                        case BOOL_VALUE:
                             if (strcmp((char *)event.data.scalar.value, "true") == 0)
                             {
                                 params[param_idx].bool_value = 1;
@@ -176,19 +176,19 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
                                 return -1;
                             }
                             break;
-                        case CONFIG_PARAMETER__VALUE_INT_VALUE:
+                        case INT_VALUE:
                             if (safe_atoi((char *)event.data.scalar.value, &params[param_idx].int_value) < 0)
                             {
                                 return -1;
                             }
                             break;
-                        case CONFIG_PARAMETER__VALUE_FLOAT_VALUE:
+                        case FLOAT_VALUE:
                             if (safe_atof((char *)event.data.scalar.value, &params[param_idx].float_value) < 0)
                             {
                                 return -1;
                             }
                             break;
-                        case CONFIG_PARAMETER__VALUE_STRING_VALUE:
+                        case STRING_VALUE:
                             params[param_idx].string_value = strdup((char *)event.data.scalar.value);
                             break;
                         default:
@@ -211,12 +211,12 @@ int parse_module_yaml_file(const char *filename, ModuleConfig *module_config)
         yaml_event_delete(&event);
     }
 
-    // Insert ConfigParameter into ModuleConfig
-    module_config->n_parameters = param_count;
-    module_config->parameters = malloc(sizeof(ConfigParameter *) * param_count);
+    // Insert ModuleParameter into ModuleParameterList
+    module_parameter_list->n_parameters = param_count;
+    module_parameter_list->parameters = malloc(sizeof(ModuleParameter *) * param_count);
     for (size_t i = 0; i < param_count; i++)
     {
-        module_config->parameters[i] = &params[i];
+        module_parameter_list->parameters[i] = &params[i];
     }
 
     cleanup_resources(&parser, &event, fh);

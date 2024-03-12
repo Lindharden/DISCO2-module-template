@@ -2,9 +2,9 @@
 
 // GENERIC PROTOBUF UTIL FUNCTIONS //
 
-static ConfigParameter *get_param(ModuleConfig *config, const char *name) {
+static ModuleParameter *get_param(ModuleParameterList *config, const char *name) {
     // find parameter
-    ConfigParameter *found_parameter = NULL;
+    ModuleParameter *found_parameter = NULL;
     for (size_t i = 0; i < config->n_parameters; i++)
     {
         if (strcmp(config->parameters[i]->key, name) == 0)
@@ -16,12 +16,12 @@ static ConfigParameter *get_param(ModuleConfig *config, const char *name) {
     return found_parameter;
 }
 
-float get_param_float(ModuleConfig *config, const char *name)
+float get_param_float(ModuleParameterList *config, const char *name)
 {   
-    ConfigParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(config, name);
 
     // identify value type
-    if (found_parameter == NULL || found_parameter->value_case != CONFIG_PARAMETER__VALUE_FLOAT_VALUE)
+    if (found_parameter == NULL || found_parameter->value_case != FLOAT_VALUE)
     {
         perror("Parameter not found or not of type float.");
     }
@@ -29,12 +29,12 @@ float get_param_float(ModuleConfig *config, const char *name)
     return found_parameter->float_value;
 }
 
-int get_param_int(ModuleConfig *config, const char *name)
+int get_param_int(ModuleParameterList *config, const char *name)
 {   
-    ConfigParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(config, name);
 
     // identify value type
-    if (found_parameter == NULL || found_parameter->value_case != CONFIG_PARAMETER__VALUE_INT_VALUE)
+    if (found_parameter == NULL || found_parameter->value_case != INT_VALUE)
     {
         perror("Parameter not found or not of type int.");
     }
@@ -42,12 +42,12 @@ int get_param_int(ModuleConfig *config, const char *name)
     return found_parameter->int_value;
 }
 
-int get_param_bool(ModuleConfig *config, const char *name)
+int get_param_bool(ModuleParameterList *config, const char *name)
 {   
-    ConfigParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(config, name);
 
     // identify value type
-    if (found_parameter == NULL || found_parameter->value_case != CONFIG_PARAMETER__VALUE_BOOL_VALUE)
+    if (found_parameter == NULL || found_parameter->value_case != BOOL_VALUE)
     {
         perror("Parameter not found or not of type bool.");
     }
@@ -55,12 +55,12 @@ int get_param_bool(ModuleConfig *config, const char *name)
     return found_parameter->bool_value;
 }
 
-char *get_param_string(ModuleConfig *config, const char *name)
+char *get_param_string(ModuleParameterList *config, const char *name)
 {   
-    ConfigParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(config, name);
 
     // identify value type
-    if (found_parameter == NULL || found_parameter->value_case != CONFIG_PARAMETER__VALUE_STRING_VALUE)
+    if (found_parameter == NULL || found_parameter->value_case != STRING_VALUE)
     {
         perror("Parameter not found or not of type string.");
     }

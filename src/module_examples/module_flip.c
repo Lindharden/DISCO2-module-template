@@ -1,7 +1,7 @@
 #include "module.h"
 #include "util.h"
 
-ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     ImageBatch mirrored_batch;
     mirrored_batch.width = input_batch->width;
     mirrored_batch.height = input_batch->height;

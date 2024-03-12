@@ -50,13 +50,13 @@ int main()
     ImageBatch batch;
     load_image(FILENAME_INPUT, &batch);
 
-	ModuleConfig config;
-	if (parse_module_yaml_file(FILENAME_CONFIG, &config) < 0)
+	ModuleParameterList module_parameter_list;
+	if (parse_module_yaml_file(FILENAME_CONFIG, &module_parameter_list) < 0)
 		return -1;
     
-    ImageBatch result = run(&batch, &config);
+    ImageBatch result = run(&batch, &module_parameter_list);
 
     save_images(FILENAME_OUTPUT, &result);
-    free(config.parameters);
+    free(module_parameter_list.parameters);
     return 0;
 }

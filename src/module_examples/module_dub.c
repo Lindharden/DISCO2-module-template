@@ -2,13 +2,15 @@
 #include "util.h"
 
 /* Main function of module */
-ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     /* Create a result batch, replace with expected dimensions */
     ImageBatch result_batch;
     result_batch.width = input_batch->width;
     result_batch.height = input_batch->height;
     result_batch.channels = input_batch->channels;
-    result_batch.num_images = input_batch->num_images * 2;
+    int dub_amount = get_param_int(config, "dubs");
+    result_batch.num_images = input_batch->num_images * dub_amount;
+
 
     /* Allocate memory for resulting image data, fit to expected output size */
     int img_size = result_batch.width * result_batch.height * result_batch.channels;

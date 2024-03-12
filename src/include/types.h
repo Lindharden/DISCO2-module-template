@@ -16,29 +16,29 @@ typedef struct ImageBatch
 
 typedef enum 
 {
-    CONFIG_PARAMETER__VALUE__NOT_SET = 0,
-    CONFIG_PARAMETER__VALUE_BOOL_VALUE = 2,
-    CONFIG_PARAMETER__VALUE_INT_VALUE = 3,
-    CONFIG_PARAMETER__VALUE_FLOAT_VALUE = 4,
-    CONFIG_PARAMETER__VALUE_STRING_VALUE = 5
-} ConfigParameter__ValueCase;
+    NOT_SET = 0,
+    BOOL_VALUE = 2,
+    INT_VALUE = 3,
+    FLOAT_VALUE = 4,
+    STRING_VALUE = 5
+} ModuleParameter__ValueCase;
 
-typedef struct ConfigParameter
+typedef struct ModuleParameter
 {
     char *key;
-    ConfigParameter__ValueCase value_case;
+    ModuleParameter__ValueCase value_case;
     union {
         int bool_value;
         int int_value;
         float float_value;
         char *string_value;
     };
-} ConfigParameter;
+} ModuleParameter;
 
-typedef struct ModuleConfig
+typedef struct ModuleParameterList
 {
     size_t n_parameters;
-    ConfigParameter **parameters;
-} ModuleConfig;
+    ModuleParameter **parameters;
+} ModuleParameterList;
 
 #endif // TYPES_H

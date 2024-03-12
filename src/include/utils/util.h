@@ -14,7 +14,7 @@
  * 
  * @return float value of parameter
  */
-float get_param_float(ModuleConfig *config, const char *name);
+float get_param_float(ModuleParameterList *config, const char *name);
 
 /**
  * Fetch integer parameter from module configuration.
@@ -24,7 +24,7 @@ float get_param_float(ModuleConfig *config, const char *name);
  *
  * @return int value of parameter
  */
-int get_param_int(ModuleConfig *config, const char *name);
+int get_param_int(ModuleParameterList *config, const char *name);
 
 /**
  * Fetch boolean parameter from module configuration.
@@ -34,7 +34,7 @@ int get_param_int(ModuleConfig *config, const char *name);
  * 
  * @return bool value of parameter as integer (0, 1)
  */
-int get_param_bool(ModuleConfig *config, const char *name);
+int get_param_bool(ModuleParameterList *config, const char *name);
 
 /**
  * Fetch string parameter from module configuration.
@@ -44,7 +44,7 @@ int get_param_bool(ModuleConfig *config, const char *name);
  *
  * @return string value of parameter
  */
-char *get_param_string(ModuleConfig *config, const char *name);
+char *get_param_string(ModuleParameterList *config, const char *name);
 
 
 // MODULE UTILITY FUNCTIONS //

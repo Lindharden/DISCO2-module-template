@@ -2,7 +2,7 @@
 #include "util.h"
 
 /* Main function of module */
-ImageBatch run(ImageBatch *input_batch, ModuleConfig *config) {
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
 
     /* Create a result batch, replace with expected dimensions */
     ImageBatch result_batch;

@@ -7,8 +7,8 @@
  * Parse contents of yaml file into ModuleConfig.
  *
  * @param filename yaml file name (relative path)
- * @param module_config output variable
+ * @param module_parameter_list output variable
  *
  * @return status code (0 = success, -1 = failure)
  */
-int parse_module_yaml_file(const char *filename, ModuleConfig *module_config);
+int parse_module_yaml_file(const char *filename, ModuleParameterList *module_parameter_list);
