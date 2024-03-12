@@ -1,6 +1,8 @@
 # DISCO2-module-template
 
-Follow this guide for developing a module for the DISCO2 Image Processing Pipeline
+Follow this guide for developing a module for the DISCO2 Image Processing Pipeline.
+
+Start by creating a new repository from this template by clicking the "Use this template" button at the top-right of the GitHub page.
 
 ## Prerequisites
 
@@ -78,15 +80,15 @@ char *param_4 = get_param_string(config, "param_name_4");
 
 ## Adding External Dependencies
 
-The modules support external dependencies. These will be compiled with the shared object library itself. To add external dependencies, you must add them in the `meson.build` file, just like the already existing dependencies:
-
+To add external dependencies, you must add them in the `meson.build` file (create dependencies and add them to the given compile targets), just like the already existing dependencies:
 ```meson
-proto_c_dep = dependency('libprotobuf-c', fallback: ['protobuf-c', 'proto_c_dep'])
 m_dep = meson.get_compiler('c').find_library('m', required : false)
-libyaml_dep = dependency('yaml-0.1')   
+libyaml_dep = dependency('yaml-0.1')  
 ...       
-deps = [m_dep, proto_c_dep, ...]
+deps = [libyaml_dep, m_dep]
 ```
+
+Keep in mind that the external dependencies must be compiled to the given architecture that you are compiling your module towards.
 
 ## Building the Module
 
