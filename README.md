@@ -162,5 +162,5 @@ In order to test and debug the module, you must first compile the module as prev
 ```json
 "program": "${workspaceFolder}/builddir/*project_name*-exec"
 ```
-Remember to dump a png image in the workspace root. The test executable can be called with an integer argument to specify how many instances of the image should be added to the `ImageBatch`.
+Remember to dump a .png image in the workspace root called `input.png`. The test executable can be called with an integer argument to specify how many instances of the image should be added to the `ImageBatch`.
 If the module expects custom parameters, these must be specified in the `config.yaml` file as explained in the [Providing Custom Parameters](#providing-custom-parameters) section.
