@@ -15,7 +15,9 @@ Rename the project inside the `meson.build` file, by editing the `project_name` 
 
 ## Writing the Module
 
-To write the module, you must edit the `module_template.c` file. This file gives examples of how the `ImageBatch` struct should be utilized, and how parameters can be accessed. 
+To write the module, you must edit the `module_template.c` file. This file gives examples of how to utilize the `ImageBatch` struct and how parameters can be accessed. 
+
+### ImageBatch Struct and Utilities
 
 The `ImageBatch` struct looks as follows:
 
@@ -26,18 +28,53 @@ typedef struct ImageBatch {
     int width;
     int channels;
     int num_images;
+    int batch_size;
     int shm_key;
     int pipeline_id;
     unsigned char *data;
 } ImageBatch;
 ```
 
-The `ImageBatch` struct contains metadata about the batch of images it contains (such as height, width and channels), and about the shared memory space and which pipeline should be utilized (not important for development). The image data from all the individual images in the batch are stored sequentially in the `data` field. Because of this it will be necessary to iterate over multiple images in the `data` field using the `num_images` field as an indicator for how many images are present in the data.
+The `ImageBatch` struct serves as a container for a collection of images, containing metadata such as their dimensions (height, width) and color channels. It also holds information regarding shared memory allocation and the specific pipeline that should be employed for processing (not important for development). The struct's data field sequentially stores the image data, with each individual image prefaced by its size—a numerical prefix detailing the byte count of the image's data. This organization facilitates the delineation and access of images within a continuous memory space.
 
-When the image batch has been processed, the `finalize` function **MUST** be called in order to copy the new image data to the shared memory space that will be passed between modules in the pipeline. The `finalize` function can be called like this:
-```c
-finalize(&result_batch, input_batch);
-```
+### Important Consideration for Input and Result Batches
+It's imperative to note that the input ImageBatch should remain unaltered and modifications are exclusively reserved for the result batch, facilitated through the provided utility functions.
+
+### Retrieving Images
+
+To access specific images within the batch, the `get_image_data` function can be used:
+ 
+- `get_image_data(int index, unsigned char **out)`: Retrieves the data of an image at the specified index, allocating memory and returning the size of the image data.
+
+Developers can iterate through the batch by incrementally advancing an index, from 0 up to the total number of images in the back (num_images - 1), using `get_image_data` at each step.
+
+
+### Utility Functions
+
+Several utility functions is implemented to faciliate interaction and manipulation of both the input and resulting image batch, encapsulated within `batch_util.c`. These functions are divided into two distinct categories: getters for querying properties of the input ImageBatch and setters/manipulation functions for altering the state of the resulting image batch (result). 
+
+#### Input Batch Utilities
+
+The utility functions for the input ImageBatch include:
+
+- `get_input_width()`
+- `get_input_height()`
+- `get_input_channels()`
+- `get_input_num_images()`
+- `get_image_data(int index, unsigned char **out)`: Retrieves the data of an image at the specified index, allocating memory and returning the size of the image data.
+
+#### Result Batch Utilities
+
+For modifying the result batch, the utilities provide:
+
+- `set_result_width(int width)`
+- `set_result_height(int height)`
+- `set_result_channels(int channels)`
+- `set_result_dimensions(int width, int height, int channels)`: Sets the width, height, and number of channels of the result batch.
+- `set_result_num_images(int num_images)`: Adjusts the total number of images in the result batch.
+- `append_result_image(unsigned char *data, size_t data_size)`: Appends an image to the batch, including size prefixing.
+
+
 
 ## Providing Custom Parameters
 
