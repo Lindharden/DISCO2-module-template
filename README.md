@@ -139,17 +139,28 @@ To build the module, run the `configure` script with either `build` or `test` as
 Use `build` when you want to cross-compile to AArch64, and use `test` if you want to compile to your current machine for testing purposes.
 
 Compiling with the `test` argument will produce the following files in the `builddir` directory:
- - `*project_name*-exec`       | Can be executed to test the module (Will not utilize shared memory for the sake of simplicity).
- - `*project_name*.so`         | Shared Oject library for use on the host architecture.
+ - `*project_name*-exec`: Can be executed to test the module (Will not utilize shared memory for the sake of simplicity).
+ - `lib*project_name*.so`: Shared Oject library for use on the host architecture.
 
 Compiling with the `build` argument will produce the following files in the `builddir` directory:
- - `*project_name*.so`         | Shared Oject library for use on AArch64 machines.
+ - `lib*project_name*.so`: Shared Oject library for use on AArch64 machines.
+
+Remeber to change the name and location of the module source file in `meson.build`, i.e:
+```meson
+# Source files
+sources = [
+    'src/module_template.c', # module file (REMEMBER TO CHANGE!)
+    'src/utils/memory_util.c',
+    'src/utils/config_util.c',
+    'src/utils/batch_util.c',
+]
+```
 
 ## Testing the Module
 
 In order to test and debug the module, you must first compile the module as previously described. This will produce the executable `*project_name*-exec` located in the `builddir` directory. This executable is able to be run using a debugger, but must be called from the workspace root. For `launch.json` in vscode, the program field should have value:
 ```json
-"program": "${workspaceFolder}/builddir/example-exec"
+"program": "${workspaceFolder}/builddir/*project_name*-exec"
 ```
-
+Remember to dump a png image in the workspace root. The test executable can be called with an integer argument to specify how many instances of the image should be added to the `ImageBatch`.
 If the module expects custom parameters, these must be specified in the `config.yaml` file as explained in the [Providing Custom Parameters](#providing-custom-parameters) section.
