@@ -26,8 +26,6 @@ int get_input_num_images()
 
 size_t get_image_data(int index, unsigned char **out)
 {
-    if (index > input->num_images || index < 0)
-        return 0;
     size_t offset = 0;
     int image_index = 0;
 

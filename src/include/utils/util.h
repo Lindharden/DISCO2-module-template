@@ -93,7 +93,7 @@ int get_input_channels();
 int get_input_num_images();
 
 /**
- * Get image data at index
+ * Retrieves the data of an image at the specified index, allocating memory and returning the size of the image data.
  *
  * @param index Index of image
  * @param out Buffer to store image data in

@@ -42,8 +42,7 @@ void module()
                 for (int c = 0; c < channels; ++c)
                 {
                     /* Accessing pixel data for image i, at position (x, y) and channel c */
-                    int pixel_index = i * (width * height * channels) +
-                                      y * (width * channels) +
+                    int pixel_index = y * (width * channels) +
                                       x * channels + c;
                     unsigned char pixel_value = input_image_data[pixel_index];
 
@@ -60,6 +59,7 @@ void module()
         append_result_image(output_image_data, image_size);
 
         /* Remember to free any allocated memory */
+        free(input_image_data);
         free(output_image_data);
     }
 }

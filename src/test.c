@@ -38,33 +38,43 @@ void save_images(const char *filename_base, const ImageBatch *batch)
     }
 }
 
-void load_image(const char *filename, ImageBatch *batch)
+void load_image(const char *filename, ImageBatch *batch, int num_images)
 {
     int image_width, image_height, image_channels;
     unsigned char *image_data = stbi_load(filename, &image_width, &image_height, &image_channels, STBI_rgb_alpha);
     batch->height = image_height;
     batch->width = image_width;
     batch->channels = image_channels;
-    batch->num_images = 1;
-    batch->shm_key = 1;
+    batch->num_images = num_images;
     size_t image_size = image_height * image_width * image_channels;
-    batch->data = (unsigned char*)malloc(image_size + sizeof(size_t));
+    size_t batch_size = (image_size + sizeof(size_t)) * num_images;
+    batch->data = (unsigned char*)malloc(batch_size);
 
     if (batch->data == NULL)
     {
         fprintf(stderr, "[test] Error: Unable to allocate memory.\n");
         exit(EXIT_FAILURE);
     }
-
-    batch->batch_size = image_size + sizeof(size_t);
-    memcpy(batch->data, &image_size, sizeof(size_t));
-    memcpy(batch->data + sizeof(size_t), image_data, image_size);
+    batch->batch_size = batch_size;
+    int offset = 0;
+    for (size_t i = 0; i < num_images; i++)
+    {
+        memcpy(batch->data + offset, &image_size, sizeof(size_t));
+        offset += sizeof(size_t);
+        memcpy(batch->data + offset, image_data, image_size);
+        offset += image_size;
+    }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    int num_images = 1;
+    if (argc > 1)
+    {
+        num_images = atoi(argv[1]);
+    }
     ImageBatch batch;
-    load_image(FILENAME_INPUT, &batch);
+    load_image(FILENAME_INPUT, &batch, num_images);
 
 	ModuleParameterList module_parameter_list;
 	if (parse_module_yaml_file(FILENAME_CONFIG, &module_parameter_list) < 0)
