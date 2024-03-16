@@ -8,7 +8,7 @@ Start by creating a new repository from this template by clicking the "Use this 
 
 Install the following packages:
 ```
-sudo apt install build-essential libyaml-dev gcc meson ninja pkg-config gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+sudo apt install build-essential libyaml-dev gcc meson ninja pkg-config gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 ```
 
 Rename the project inside the `meson.build` file, by editing the `project_name` variable and the project name. This name is used for the shared library files, and the test executable.
@@ -34,7 +34,7 @@ typedef struct ImageBatch {
 
 The `ImageBatch` struct contains metadata about the batch of images it contains (such as height, width and channels), and about the shared memory space and which pipeline should be utilized (not important for development). The image data from all the individual images in the batch are stored sequentially in the `data` field. Because of this it will be necessary to iterate over multiple images in the `data` field using the `num_images` field as an indicator for how many images are present in the data.
 
-When the image batch has been processed, the `finalize` function must be called, in order to copy the new image data to memory. The `finalize` function can be called like this:
+When the image batch has been processed, the `finalize` function **MUST** be called in order to copy the new image data to the shared memory space that will be passed between modules in the pipeline. The `finalize` function can be called like this:
 ```c
 finalize(&result_batch, input_batch);
 ```
@@ -80,15 +80,17 @@ char *param_4 = get_param_string(config, "param_name_4");
 
 ## Adding External Dependencies
 
-To add external dependencies, you must add them in the `meson.build` file (create dependencies and add them to the given compile targets), just like the already existing dependencies:
+**Modules are required to be fully self-contained, which entails that any external dependencies must be statically compiled into the module.**
+
+To add external dependencies, you must add them in the `meson.build` file (create dependencies and add them to the given compile targets), just like in this example:
 ```meson
 m_dep = meson.get_compiler('c').find_library('m', required : false)
-libyaml_dep = dependency('yaml-0.1')  
+libwebp_dep = dependency('libwebp', fallback: ['webp'], static: true)
 ...       
-deps = [libyaml_dep, m_dep]
+dependencies: [libwebp_dep]
 ```
 
-Keep in mind that the external dependencies must be compiled to the given architecture that you are compiling your module towards.
+Keep in mind that the external dependencies must be compiled to the given architecture that you are compiling your module towards and be compiled statically to ensure the module is fully self-contained.
 
 ## Building the Module
 
