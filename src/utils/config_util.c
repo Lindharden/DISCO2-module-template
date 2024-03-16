@@ -2,7 +2,7 @@
 
 // GENERIC PROTOBUF UTIL FUNCTIONS //
 
-static ModuleParameter *get_param(ModuleParameterList *config, const char *name) {
+static ModuleParameter *get_param(const char *name) {
     // find parameter
     ModuleParameter *found_parameter = NULL;
     for (size_t i = 0; i < config->n_parameters; i++)
@@ -16,9 +16,9 @@ static ModuleParameter *get_param(ModuleParameterList *config, const char *name)
     return found_parameter;
 }
 
-float get_param_float(ModuleParameterList *config, const char *name)
+float get_param_float(const char *name)
 {   
-    ModuleParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(name);
 
     // identify value type
     if (found_parameter == NULL || found_parameter->value_case != FLOAT_VALUE)
@@ -29,9 +29,9 @@ float get_param_float(ModuleParameterList *config, const char *name)
     return found_parameter->float_value;
 }
 
-int get_param_int(ModuleParameterList *config, const char *name)
+int get_param_int(const char *name)
 {   
-    ModuleParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(name);
 
     // identify value type
     if (found_parameter == NULL || found_parameter->value_case != INT_VALUE)
@@ -42,9 +42,9 @@ int get_param_int(ModuleParameterList *config, const char *name)
     return found_parameter->int_value;
 }
 
-int get_param_bool(ModuleParameterList *config, const char *name)
+int get_param_bool(const char *name)
 {   
-    ModuleParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(name);
 
     // identify value type
     if (found_parameter == NULL || found_parameter->value_case != BOOL_VALUE)
@@ -55,9 +55,9 @@ int get_param_bool(ModuleParameterList *config, const char *name)
     return found_parameter->bool_value;
 }
 
-char *get_param_string(ModuleParameterList *config, const char *name)
+char *get_param_string(const char *name)
 {   
-    ModuleParameter *found_parameter = get_param(config, name);
+    ModuleParameter *found_parameter = get_param(name);
 
     // identify value type
     if (found_parameter == NULL || found_parameter->value_case != STRING_VALUE)

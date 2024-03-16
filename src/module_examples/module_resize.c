@@ -12,6 +12,13 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     // Calculate the size of the entire batch after resizing
     int output_size_per_image = result_batch.width * result_batch.height * result_batch.channels;
     unsigned char *new_data = (unsigned char *)malloc(output_size_per_image * result_batch.num_images);
+
+    if (new_data == NULL)
+    {
+        fprintf(stderr, "[module_resize] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
     result_batch.data = new_data;
 
     // Original size of one image in the batch

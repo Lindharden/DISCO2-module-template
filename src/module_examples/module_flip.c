@@ -14,6 +14,13 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     // Calculate the size of the entire batch
     int data_size = input_batch->width * input_batch->height * input_batch->channels * input_batch->num_images;   
     unsigned char *new_data = (unsigned char *)malloc(data_size);
+
+    if (new_data == NULL)
+    {
+        fprintf(stderr, "[module_flip] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
     mirrored_batch.data = new_data;
     
     // Calculate the size of each image in bytes

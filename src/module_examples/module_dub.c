@@ -16,6 +16,13 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     int img_size = result_batch.width * result_batch.height * result_batch.channels;
     int data_size = img_size * result_batch.num_images;
     unsigned char *new_data = (unsigned char *)malloc(data_size);
+
+    if (new_data == NULL)
+    {
+        fprintf(stderr, "[module_dub] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
     result_batch.data = new_data;
 
     for (size_t i = 0; i < result_batch.num_images; i++)

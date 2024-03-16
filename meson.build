@@ -1,4 +1,4 @@
-project('example', 'c')
+project('example', 'c', 'cpp')
 project_name = 'example'
 
 # Compiler and linker flags
@@ -13,6 +13,7 @@ sources = [
     'src/module_template.c',
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
+    'src/utils/batch_util.c',
 ]
 
 dirs = include_directories(
@@ -23,7 +24,8 @@ dirs = include_directories(
 # Shared library (SO)
 shared_library(project_name, sources,
     include_directories: dirs,
-    c_args: cflags + ['-DSHARED_MEMORY=1']
+    c_args: cflags + ['-DSHARED_MEMORY=1'],
+    dependencies: []
 )
 
 # Check whether we are cross-compiling or not
@@ -31,12 +33,11 @@ if not get_option('cross-compile')
     # If not cross-compiling, include the executable target
     sources += 'src/test.c'
     sources += 'src/utils/yaml_parser.c'
-    deps = [libyaml_dep, m_dep]
 
     # Executable
     executable(project_name + '-exec', sources,
         include_directories: dirs,
         c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-        dependencies: deps
+        dependencies: [libyaml_dep, m_dep]
     )
 endif

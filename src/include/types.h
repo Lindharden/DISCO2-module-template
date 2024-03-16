@@ -9,6 +9,7 @@ typedef struct ImageBatch
     int width;
     int channels;
     int num_images;
+    int batch_size;
     int shm_key;
     int pipeline_id;
     unsigned char *data;

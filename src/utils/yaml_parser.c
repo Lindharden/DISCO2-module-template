@@ -129,10 +129,6 @@ int parse_module_yaml_file(const char *filename, ModuleParameterList *module_par
                 }
                 params = temp;
 
-                // Fill in the new struct
-                ModuleParameter param;
-                params[param_idx] = param;
-
                 param_count++;
                 break;
             case YAML_SCALAR_EVENT:
@@ -149,7 +145,7 @@ int parse_module_yaml_file(const char *filename, ModuleParameterList *module_par
                     // Expect the next event to be the value of name
                     if (!yaml_parser_parse(&parser, &event))
                         break;
-                    if (safe_atoi((char *)event.data.scalar.value, &params[param_idx].value_case) < 0)
+                    if (safe_atoi((char *)event.data.scalar.value, (int *)&params[param_idx].value_case) < 0)
                     {
                         return -1;
                     }
@@ -177,7 +173,7 @@ int parse_module_yaml_file(const char *filename, ModuleParameterList *module_par
                             }
                             break;
                         case INT_VALUE:
-                            if (safe_atoi((char *)event.data.scalar.value, &params[param_idx].int_value) < 0)
+                            if (safe_atoi((char *)event.data.scalar.value, (int *)&params[param_idx].int_value) < 0)
                             {
                                 return -1;
                             }
@@ -214,6 +210,14 @@ int parse_module_yaml_file(const char *filename, ModuleParameterList *module_par
     // Insert ModuleParameter into ModuleParameterList
     module_parameter_list->n_parameters = param_count;
     module_parameter_list->parameters = malloc(sizeof(ModuleParameter *) * param_count);
+
+    if (module_parameter_list->parameters == NULL)
+    {
+        fprintf(stderr, "[yaml_parser] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
+
     for (size_t i = 0; i < param_count; i++)
     {
         module_parameter_list->parameters[i] = &params[i];

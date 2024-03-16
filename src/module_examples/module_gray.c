@@ -15,6 +15,13 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config) {
     // Calculate the size of the black and white image data
     size_t bwDataSize = gray_batch.height * gray_batch.width * gray_batch.channels * gray_batch.num_images;
     unsigned char *new_data = (unsigned char *)malloc(bwDataSize);
+
+    if (new_data == NULL)
+    {
+        fprintf(stderr, "[module_gray] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
     gray_batch.data = new_data;
 
     for (int i = 0; i < batch_size; i += input_batch->channels) {

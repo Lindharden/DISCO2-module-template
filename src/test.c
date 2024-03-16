@@ -6,28 +6,35 @@
 #include "yaml_parser.h"
 
 #define FILENAME_INPUT "input.png"
-#define FILENAME_OUTPUT "output.png"
+#define FILENAME_OUTPUT "output"
 #define FILENAME_CONFIG "config.yaml"
 
 void save_images(const char *filename_base, const ImageBatch *batch)
 {
-    int image_size = batch->width * batch->height * batch->channels;
-    for (size_t i = 0; i < batch->num_images; i++)
-    {
-        char filename[20];
-        sprintf(filename, "%s%ld.png", filename_base, i);
+    size_t offset = 0;
+    int image_index = 0;
+    
+    while (image_index < batch->num_images && offset < batch->batch_size) {
+        size_t image_size = *((size_t *)(batch->data + offset));
+        offset += sizeof(size_t); // Move the offset to the start of the image data
 
-        // Determine the desired output format (e.g., PNG)
-        int stride = batch->width * batch->channels;
-        int success = stbi_write_png(filename, batch->width, batch->height, batch->channels, &batch->data[i * image_size], stride);
+        char filename[20];
+        sprintf(filename, "%s%d.png", filename_base, image_index);
+
+        int stride = batch->width * batch->channels * sizeof(uint8_t);
+        int success = stbi_write_png(filename, batch->width, batch->height, batch->channels, batch->data + offset, stride);
         if (!success)
         {
-            fprintf(stderr, "Error writing image to %s\n", filename);
+            fprintf(stderr, "[test.c]: Error writing image to %s\n", filename);
         }
         else
         {
-            printf("Image saved as %s\n", filename);
+            printf("[test.c]: Image saved as %s\n", filename);
         }
+
+        offset += image_size; // Move the offset to the start of the next image block
+
+        image_index++;
     }
 }
 
@@ -41,8 +48,17 @@ void load_image(const char *filename, ImageBatch *batch)
     batch->num_images = 1;
     batch->shm_key = 1;
     size_t image_size = image_height * image_width * image_channels;
-    batch->data = (unsigned char*)malloc(image_size);
-    memcpy(batch->data, image_data, image_size);
+    batch->data = (unsigned char*)malloc(image_size + sizeof(size_t));
+
+    if (batch->data == NULL)
+    {
+        fprintf(stderr, "[test] Error: Unable to allocate memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    batch->batch_size = image_size + sizeof(size_t);
+    memcpy(batch->data, &image_size, sizeof(size_t));
+    memcpy(batch->data + sizeof(size_t), image_data, image_size);
 }
 
 int main()
@@ -58,5 +74,6 @@ int main()
 
     save_images(FILENAME_OUTPUT, &result);
     free(module_parameter_list.parameters);
+    free(result.data);
     return 0;
 }
