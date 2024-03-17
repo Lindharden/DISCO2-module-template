@@ -50,6 +50,8 @@ void module()
         }
 
         append_result_image(output_image_data, img_size);
+        free(input_image_data);
+        free(output_image_data);
     }
 }
 
