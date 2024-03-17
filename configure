@@ -32,8 +32,6 @@ else
 fi
 
 # Navigate to the build directory and build the project
-cd builddir
-ninja
-cd ..
+ninja -C builddir
 
 exit 0
