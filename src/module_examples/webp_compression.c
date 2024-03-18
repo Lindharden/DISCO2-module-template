@@ -35,6 +35,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *config)
     /* Create a result batch, replace with expected dimensions */
     ImageBatch result_batch;
     input = input_batch;
+    result->batch_size = 0;
     result = &result_batch;
     config = config;
 

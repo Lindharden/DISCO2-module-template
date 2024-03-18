@@ -71,6 +71,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_li
 {
     ImageBatch result_batch;
     result = &result_batch;
+    result->batch_size = 0;
     input = input_batch;
     config = module_parameter_list;
 
