@@ -15,7 +15,7 @@ Rename the project inside the `meson.build` file, by editing the `project_name` 
 
 ## Writing the Module
 
-To write the module, you must edit the `module_template.c` file. This file gives examples of how to utilize the `ImageBatch` struct and how parameters can be accessed. 
+To write the module, you must edit the `module_template.c` or `module_template.cpp` file (remember to change the build source file to the `.cpp` version in `meson.build` if using C++). These files give examples of how to utilize the `ImageBatch` struct and how parameters can be accessed. 
 
 ### ImageBatch Struct and Utilities
 
