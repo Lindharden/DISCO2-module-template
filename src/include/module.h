@@ -14,10 +14,11 @@ extern "C" {
  *
  * @param input_batch Input image batch.
  * @param module_parameter_list Configuration parameter values.
+ * @param error_pipe Pipe for error reporting to main process.
  * 
  * @return resulting image batch
  */
-ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list);
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *error_pipe);
 
 // End extern "C" block
 #ifdef __cplusplus

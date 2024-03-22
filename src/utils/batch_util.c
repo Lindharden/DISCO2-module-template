@@ -40,8 +40,7 @@ size_t get_image_data(int index, unsigned char **out)
             *out = (unsigned char *)malloc(image_size);
 
             if (*out == NULL) {
-                fprintf(stderr, "[Batch_util] Error: Unable to allocate memory.\n");
-                exit(EXIT_FAILURE);
+                signal_error_and_exit(100);
             }
 
             memcpy(*out, input->data + offset, image_size);
@@ -90,8 +89,7 @@ void append_result_image(unsigned char *data, size_t data_size)
         
         if (result->data == NULL)
         {
-            fprintf(stderr, "[Batch_util] Error: Unable to allocate memory.\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(100);
         }
     }
     else
@@ -100,8 +98,7 @@ void append_result_image(unsigned char *data, size_t data_size)
 
         if (tmp == NULL) 
         {
-            fprintf(stderr, "[Batch_util] Error: Unable to reallocate memory.\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(101);
         }
 
         result->data = tmp;

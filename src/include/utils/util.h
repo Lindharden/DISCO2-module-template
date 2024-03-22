@@ -147,6 +147,15 @@ void set_result_num_images(int num_images);
 void append_result_image(unsigned char *data, size_t data_size);
 
 
+// ERROR REPORTING UTILITY FUNCTIONS //
+
+/**
+ * Report an error to the main process and exit with failure
+ * 
+ * @param error_code code of the error (0-99)
+*/
+void signal_error_and_exit(uint16_t error_code);
+
 // End extern "C" block
 #ifdef __cplusplus
 }

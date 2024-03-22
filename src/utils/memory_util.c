@@ -8,14 +8,12 @@ void finalize() {
 
     int shmid = shmget(input->shm_key, 0, 0);
     if (shmid == -1) {
-        fprintf(stderr, "Could not get shared memory ID");
-        exit(EXIT_FAILURE);
+        signal_error_and_exit(300);
     }
     
     struct shmid_ds info;
     if (shmctl(shmid, IPC_STAT, &info) == -1) {
-        fprintf(stderr, "Could not get shared memory stats");
-        exit(EXIT_FAILURE);
+        signal_error_and_exit(300);
     }
     
     size_t shm_size = info.shm_segsz;
@@ -41,12 +39,10 @@ void finalize() {
 
         // Detach and free old shared memory segment
         if (shmdt(input->data) == -1) {
-            fprintf(stderr, "Error detaching old shared memory\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(301);
         }
         if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-            fprintf(stderr, "Error removing old shared memory\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(302);
         }
     } else {
         // No resize is needed: We can utilize the old shared memory space

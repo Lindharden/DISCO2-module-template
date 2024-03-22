@@ -33,13 +33,14 @@ void module()
     }
 }
 
-ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list)
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
 {
     ImageBatch result_batch;
     result = &result_batch;
     result->batch_size = 0;
     input = input_batch;
     config = module_parameter_list;
+    error_pipe = ipc_error_pipe;
 
     module();
 

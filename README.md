@@ -74,7 +74,13 @@ For modifying the result batch, the utilities provide:
 - `set_result_num_images(int num_images)`: Adjusts the total number of images in the result batch.
 - `append_result_image(unsigned char *data, size_t data_size)`: Appends an image to the batch, including size prefixing.
 
+#### Error Utilities
 
+For reporting errors, the utilities provide:
+
+- `signal_error_and_exit(uint16_t error_code)`: Communicates the error code to the main process and exits with failure.
+
+It is recommended to define your own custom error codes (values between 1-99) in the `ERROR_CODE` enum defined at the top of the module template. This helps clearify what each error code mean for future diagnostics.
 
 ## Providing Custom Parameters
 

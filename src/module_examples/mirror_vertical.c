@@ -1,6 +1,12 @@
 #include "module.h"
 #include "util.h"
 
+/* Define custom error codes in the range of 1-99*/
+enum ERROR_CODE {
+    MALLOC_ERR = 1,
+    PLACEHOLDER = 2,
+};
+
 void module()
 {
     int input_width = get_input_width();
@@ -20,8 +26,7 @@ void module()
         unsigned char *output_image_data = (unsigned char *)malloc(img_size);
         if (output_image_data == NULL)
         {
-            fprintf(stderr, "[module_flip] Error: Unable to allocate memory.\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(MALLOC_ERR);
         }
 
         for (int y = 0; y < input_height; ++y)
@@ -55,13 +60,14 @@ void module()
     }
 }
 
-ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list)
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
 {
     ImageBatch result_batch;
     result = &result_batch;
     result->batch_size = 0;
     input = input_batch;
     config = module_parameter_list;
+    error_pipe = ipc_error_pipe;
 
     module();
 

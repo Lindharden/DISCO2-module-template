@@ -1,6 +1,12 @@
 #include "module.h"
 #include "util.h"
 
+/* Define custom error codes */
+enum ERROR_CODE {
+    MALLOC_ERR = 1,
+    PLACEHOLDER = 2,
+};
+
 /* START MODULE IMPLEMENTATION */
 void module()
 {
@@ -29,10 +35,10 @@ void module()
         /* Define temporary output image */
         unsigned char *output_image_data = (unsigned char *)malloc(image_size);
 
+        /* Check for malloc error */
         if (output_image_data == NULL)
         {
-            fprintf(stderr, "[module_template] Error: Unable to allocate memory.\n");
-            exit(EXIT_FAILURE);
+            signal_error_and_exit(MALLOC_ERR);
         }
 
         for (int y = 0; y < height; ++y)
@@ -66,13 +72,14 @@ void module()
 /* END MODULE IMPLEMENTATION */
 
 /* Main function of module (NO NEED TO MODIFY) */
-ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list)
+ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
 {
     ImageBatch result_batch;
     result = &result_batch;
     result->batch_size = 0;
     input = input_batch;
     config = module_parameter_list;
+    error_pipe = ipc_error_pipe;
 
     module();
 

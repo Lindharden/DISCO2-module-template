@@ -2,7 +2,7 @@
 #define TYPES_H
 #include <stddef.h>
 
-typedef struct ImageBatch 
+typedef struct ImageBatch
 {
     long mtype;
     int height;
@@ -15,7 +15,7 @@ typedef struct ImageBatch
     unsigned char *data;
 } ImageBatch;
 
-typedef enum 
+typedef enum ModuleParameter__ValueCase
 {
     NOT_SET = 0,
     BOOL_VALUE = 2,

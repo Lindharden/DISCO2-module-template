@@ -14,6 +14,7 @@ sources = [
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
+    'src/utils/error_util.c',
 ]
 
 dirs = include_directories(
