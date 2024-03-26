@@ -10,7 +10,7 @@ libyaml_dep = dependency('yaml-0.1')
 
 # Source files
 sources = [
-    'src/module_template.c', # module file (REMEMBER TO CHANGE!)
+    'src/module_template.cpp', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
@@ -20,6 +20,8 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
+    'lib/libedgetpu/tflite/public',
+    'lib/tensorflow',
 )
 
 # Shared library (SO)
