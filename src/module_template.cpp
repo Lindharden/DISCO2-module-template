@@ -7,6 +7,9 @@
 #include <tensorflow/lite/tools/gen_op_registration.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+
+using namespace cv;
 
 /* Define custom error codes */
 enum ERROR_CODE {
