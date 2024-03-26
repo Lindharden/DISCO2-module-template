@@ -6,6 +6,7 @@
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/tools/gen_op_registration.h>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 
 /* Define custom error codes */
 enum ERROR_CODE {
@@ -34,12 +35,12 @@ void prepareInputData(float* inputTensorData, ImageBatch input_data) {
     cv::Mat image = cv::Mat(get_input_height(), get_input_width(), CV_8UC3, (void*)image_data); // CV_8UC3 indicates 8-bit unsigned integer with 3 channels (RBG)
     cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 
-    /* Resize image to expected image size for model */
-    cv::Mat resizedImage;
-    cv::resize(image, resizedImage, cv::Size(224, 224), 0, 0, cv::INTER_LINEAR);
-
     /* Expected image size */
     int width = 224, height = 224, channels = 3;
+
+    /* Resize image to expected image size for model */
+    cv::Mat resizedImage;
+    cv::resize(image, resizedImage, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
 
     /* Normalization of pixel values to a value between 0 and 1 - as required by the model https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite */
     for (int y = 0; y < height; ++y) {
@@ -62,6 +63,14 @@ void module()
     int height = get_input_height();
     int channels = get_input_channels();
     int num_images = get_input_num_images();
+    
+    /* Edge TPU context that we need to create for the Coral AI tpu */
+    auto edgetpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
+
+    if (!edgetpu_context) {
+        std::cerr << "Failed to obtain Edge TPU context" << std::endl;
+        return;
+    }
 
     const char* model_path = "model/mobilenet.tflite"; // https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite
     auto model = tflite::FlatBufferModel::BuildFromFile(model_path);
@@ -71,13 +80,17 @@ void module()
         return;
     }
 
-    // Expected input image shape of 224 x 224 pixels
+    /* Expected input image shape of 224 x 224 pixels */
     const int model_height = 224;
     const int model_width = 224;
     const int model_channels = 3;
 
-    // Build the interpreter with Edge TPU context if necessary
     tflite::ops::builtin::BuiltinOpResolver resolver;
+
+    /* Register the Edge TPU */
+    resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
+
+    /* Build the interpreter with the Edge TPU context added above */
     tflite::InterpreterBuilder builder(*model, resolver);
     builder(&interpreter);
     if (!interpreter) {
@@ -85,30 +98,34 @@ void module()
         return;
     }
 
+    /* Bind the Edge TPU context to the interpreter */
+    interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context.get());
+    interpreter->SetNumThreads(1); // When number of threads is 1 it becomes deterministic
+
     if (interpreter->AllocateTensors() != kTfLiteOk) {
         std::cerr << "Failed to allocate tensors!" << std::endl;
         return;
     }
 
-    // Preprocess input data and set the input tensor
+    /* Preprocess input data and set the input tensor */
     float* inputTensorData = interpreter->typed_input_tensor<float>(0);
     prepareInputData(inputTensorData, &input);
 
-    // Run inference
+    /* Run inference */
     if (interpreter->Invoke() != kTfLiteOk) {
         std::cerr << "Failed to invoke interpreter" << std::endl;
         return;
     }
 
-    // Retrieve output data
+    /* Retrieve output data */
     float* outputData = interpreter->typed_output_tensor<float>(0);
     int outputSize = interpreter->tensor(interpreter->outputs()[0])->bytes / sizeof(float);
     std::vector<float> outputVector(outputData, outputData + outputSize);
 
-    // Apply softmax to the output vector to convert logits to probabilities
+    /* Apply softmax to the output vector to convert logits to probabilities */
     softmax(outputVector);
 
-    // Print the probabilities
+    /* Print the probabilities */
     for (size_t i = 0; i < outputVector.size(); ++i) {
         std::cout << "Probability of class " << i << ": " << outputVector[i] << std::endl;
     }

@@ -22,6 +22,7 @@ dirs = include_directories(
     'src/include/utils',
     'lib/libedgetpu/tflite/public',
     'lib/tensorflow',
+    'lib/opencv',
 )
 
 # Shared library (SO)
