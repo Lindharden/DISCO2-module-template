@@ -1,11 +1,58 @@
 #include "module.h"
 #include "util.h"
+#include "edgetpu.h"
+#include <tensorflow/lite/interpreter.h>
+#include <tensorflow/lite/model.h>
+#include <tensorflow/lite/kernels/register.h>
+#include <tensorflow/lite/tools/gen_op_registration.h>
+#include <iostream>
 
 /* Define custom error codes */
 enum ERROR_CODE {
     MALLOC_ERR = 1,
     PLACEHOLDER = 2,
 };
+
+void softmax(std::vector<float>& input) {
+    /* Apply softmax to convert logits to probabilities */
+    float sum = 0.0f;
+    for(auto& val : input) {
+        val = std::exp(val);
+        sum += val;
+    }
+    for(auto& val : input) {
+        val /= sum;
+    }
+}
+
+void prepareInputData(float* inputTensorData, ImageBatch input_data) {
+    /* Prepare image data for inference */
+    unsigned char * image_data;
+    size_t image_size = get_image_data(1, &image_data);
+    
+    /* Create OpenCV Image object */
+    cv::Mat image = cv::Mat(get_input_height(), get_input_width(), CV_8UC3, (void*)image_data); // CV_8UC3 indicates 8-bit unsigned integer with 3 channels (RBG)
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+
+    /* Resize image to expected image size for model */
+    cv::Mat resizedImage;
+    cv::resize(image, resizedImage, cv::Size(224, 224), 0, 0, cv::INTER_LINEAR);
+
+    /* Expected image size */
+    int width = 224, height = 224, channels = 3;
+
+    /* Normalization of pixel values to a value between 0 and 1 - as required by the model https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite */
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            for (int c = 0; c < channels; ++c) {
+                int idx = (y * width + x) * channels + c;
+                inputTensorData[idx] = resizedImage.at<cv::Vec3b>(y, x)[c] / 255.0f;
+            }
+        }
+    }
+}
+
+std::unique_ptr<tflite::Interpreter> interpreter;
 
 /* START MODULE IMPLEMENTATION */
 void module()
@@ -16,57 +63,54 @@ void module()
     int channels = get_input_channels();
     int num_images = get_input_num_images();
 
-    /* Set dimensions of output */
-    set_result_dimensions(width, height, channels);
-    set_result_num_images(num_images);
+    const char* model_path = "model/mobilenet.tflite"; // https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite
+    auto model = tflite::FlatBufferModel::BuildFromFile(model_path);
 
-    /* Retrieve module parameters by name (defined in config.yaml) */
-    int param_1 = get_param_bool("param_name_1");
-    int param_2 = get_param_int("param_name_2");
-    float param_3 = get_param_float("param_name_3");
-    char *param_4 = get_param_string("param_name_4");
+    if (!model) {
+        std::cerr << "Failed to load model" << std::endl;
+        return;
+    }
 
-    /* Example code for iterating a pixel value at a time */
-    for (int i = 0; i < num_images; ++i)
-    {
-        unsigned char *input_image_data;
-        size_t image_size = get_image_data(i, &input_image_data);
+    // Expected input image shape of 224 x 224 pixels
+    const int model_height = 224;
+    const int model_width = 224;
+    const int model_channels = 3;
 
-        /* Define temporary output image */
-        unsigned char *output_image_data = (unsigned char *)malloc(image_size);
+    // Build the interpreter with Edge TPU context if necessary
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    tflite::InterpreterBuilder builder(*model, resolver);
+    builder(&interpreter);
+    if (!interpreter) {
+        std::cerr << "Failed to create interpreter" << std::endl;
+        return;
+    }
 
-        /* Check for malloc error */
-        if (output_image_data == NULL)
-        {
-            signal_error_and_exit(MALLOC_ERR);
-        }
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+        std::cerr << "Failed to allocate tensors!" << std::endl;
+        return;
+    }
 
-        for (int y = 0; y < height; ++y)
-        {
-            for (int x = 0; x < width; ++x)
-            {
-                for (int c = 0; c < channels; ++c)
-                {
-                    /* Accessing pixel data for image i, at position (x, y) and channel c */
-                    int pixel_index = y * (width * channels) +
-                                      x * channels + c;
-                    unsigned char pixel_value = input_image_data[pixel_index];
+    // Preprocess input data and set the input tensor
+    float* inputTensorData = interpreter->typed_input_tensor<float>(0);
+    prepareInputData(inputTensorData, &input);
 
-                    /* Perform any processing here */
-                    /* Example: You can manipulate pixel_value or perform any operation */
+    // Run inference
+    if (interpreter->Invoke() != kTfLiteOk) {
+        std::cerr << "Failed to invoke interpreter" << std::endl;
+        return;
+    }
 
-                    /* If you want to write back processed value, you can do something like this: */
-                    output_image_data[pixel_index] = pixel_value;
-                }
-            }
-        }
+    // Retrieve output data
+    float* outputData = interpreter->typed_output_tensor<float>(0);
+    int outputSize = interpreter->tensor(interpreter->outputs()[0])->bytes / sizeof(float);
+    std::vector<float> outputVector(outputData, outputData + outputSize);
 
-        /* Append the image to the result batch */
-        append_result_image(output_image_data, image_size);
+    // Apply softmax to the output vector to convert logits to probabilities
+    softmax(outputVector);
 
-        /* Remember to free any allocated memory */
-        free(input_image_data);
-        free(output_image_data);
+    // Print the probabilities
+    for (size_t i = 0; i < outputVector.size(); ++i) {
+        std::cout << "Probability of class " << i << ": " << outputVector[i] << std::endl;
     }
 }
 /* END MODULE IMPLEMENTATION */
