@@ -4,3 +4,6 @@
 [submodule "lib/tensorflow"]
 	path = lib/tensorflow
 	url = https://github.com/tensorflow/tensorflow
+[submodule "lib/opencv"]
+	path = lib/opencv
+	url = https://github.com/opencv/opencv.git
