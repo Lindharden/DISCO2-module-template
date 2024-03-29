@@ -12,30 +12,35 @@
 using namespace cv;
 
 /* Define custom error codes */
-enum ERROR_CODE {
+enum ERROR_CODE
+{
     MALLOC_ERR = 1,
     PLACEHOLDER = 2,
 };
 
-void softmax(std::vector<float>& input) {
+void softmax(std::vector<float> &input)
+{
     /* Apply softmax to convert logits to probabilities */
     float sum = 0.0f;
-    for(auto& val : input) {
+    for (auto &val : input)
+    {
         val = std::exp(val);
         sum += val;
     }
-    for(auto& val : input) {
+    for (auto &val : input)
+    {
         val /= sum;
     }
 }
 
-void prepareInputData(float* inputTensorData, ImageBatch input_data) {
+void prepareInputData(float *inputTensorData, ImageBatch *input_data)
+{
     /* Prepare image data for inference */
-    unsigned char * image_data;
+    unsigned char *image_data;
     size_t image_size = get_image_data(1, &image_data);
-    
+
     /* Create OpenCV Image object */
-    cv::Mat image = cv::Mat(get_input_height(), get_input_width(), CV_8UC3, (void*)image_data); // CV_8UC3 indicates 8-bit unsigned integer with 3 channels (RBG)
+    cv::Mat image = cv::Mat(get_input_height(), get_input_width(), CV_8UC3, (void *)image_data); // CV_8UC3 indicates 8-bit unsigned integer with 3 channels (RBG)
     cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
 
     /* Expected image size */
@@ -46,9 +51,12 @@ void prepareInputData(float* inputTensorData, ImageBatch input_data) {
     cv::resize(image, resizedImage, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
 
     /* Normalization of pixel values to a value between 0 and 1 - as required by the model https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite */
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            for (int c = 0; c < channels; ++c) {
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            for (int c = 0; c < channels; ++c)
+            {
                 int idx = (y * width + x) * channels + c;
                 inputTensorData[idx] = resizedImage.at<cv::Vec3b>(y, x)[c] / 255.0f;
             }
@@ -66,19 +74,21 @@ void module()
     int height = get_input_height();
     int channels = get_input_channels();
     int num_images = get_input_num_images();
-    
+
     /* Edge TPU context that we need to create for the Coral AI tpu */
     auto edgetpu_context = edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
 
-    if (!edgetpu_context) {
+    if (!edgetpu_context)
+    {
         std::cerr << "Failed to obtain Edge TPU context" << std::endl;
         return;
     }
 
-    const char* model_path = "model/mobilenet.tflite"; // https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite
+    const char *model_path = "model/mobilenet.tflite"; // https://www.kaggle.com/models/google/mobilenet-v3/frameworks/tfLite
     auto model = tflite::FlatBufferModel::BuildFromFile(model_path);
 
-    if (!model) {
+    if (!model)
+    {
         std::cerr << "Failed to load model" << std::endl;
         return;
     }
@@ -96,7 +106,8 @@ void module()
     /* Build the interpreter with the Edge TPU context added above */
     tflite::InterpreterBuilder builder(*model, resolver);
     builder(&interpreter);
-    if (!interpreter) {
+    if (!interpreter)
+    {
         std::cerr << "Failed to create interpreter" << std::endl;
         return;
     }
@@ -105,23 +116,25 @@ void module()
     interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context.get());
     interpreter->SetNumThreads(1); // When number of threads is 1 it becomes deterministic
 
-    if (interpreter->AllocateTensors() != kTfLiteOk) {
+    if (interpreter->AllocateTensors() != kTfLiteOk)
+    {
         std::cerr << "Failed to allocate tensors!" << std::endl;
         return;
     }
 
     /* Preprocess input data and set the input tensor */
-    float* inputTensorData = interpreter->typed_input_tensor<float>(0);
-    prepareInputData(inputTensorData, &input);
+    float *inputTensorData = interpreter->typed_input_tensor<float>(0);
+    prepareInputData(inputTensorData, input);
 
     /* Run inference */
-    if (interpreter->Invoke() != kTfLiteOk) {
+    if (interpreter->Invoke() != kTfLiteOk)
+    {
         std::cerr << "Failed to invoke interpreter" << std::endl;
         return;
     }
 
     /* Retrieve output data */
-    float* outputData = interpreter->typed_output_tensor<float>(0);
+    float *outputData = interpreter->typed_output_tensor<float>(0);
     int outputSize = interpreter->tensor(interpreter->outputs()[0])->bytes / sizeof(float);
     std::vector<float> outputVector(outputData, outputData + outputSize);
 
@@ -129,7 +142,8 @@ void module()
     softmax(outputVector);
 
     /* Print the probabilities */
-    for (size_t i = 0; i < outputVector.size(); ++i) {
+    for (size_t i = 0; i < outputVector.size(); ++i)
+    {
         std::cout << "Probability of class " << i << ": " << outputVector[i] << std::endl;
     }
 }
