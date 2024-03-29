@@ -6,6 +6,7 @@ cflags = ['-Wall']
 
 # External dependencies
 m_dep = meson.get_compiler('c').find_library('m', required : false)
+opencv_dep = dependency('opencv4')
 libyaml_dep = dependency('yaml-0.1')
 
 # Source files
@@ -22,14 +23,13 @@ dirs = include_directories(
     'src/include/utils',
     'lib/libedgetpu/tflite/public',
     'lib/tensorflow',
-    'lib/opencv',
 )
 
 # Shared library (SO)
 shared_library(project_name, sources,
     include_directories: dirs,
     c_args: cflags + ['-DSHARED_MEMORY=1'],
-    dependencies: []
+    dependencies: [opencv_dep]
 )
 
 # Check whether we are cross-compiling or not
@@ -42,6 +42,6 @@ if not get_option('cross-compile')
     executable(project_name + '-exec', sources,
         include_directories: dirs,
         c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-        dependencies: [libyaml_dep, m_dep]
+        dependencies: [libyaml_dep, m_dep, opencv_dep]
     )
 endif
