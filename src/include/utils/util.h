@@ -97,9 +97,9 @@ int get_input_num_images();
  *
  * @param index Index of image
  * @param out Buffer to store image data in
- * @return Size of image data as size_t
+ * @return Size of image data as uint32_t
  */
-size_t get_image_data(int index, unsigned char **out);
+uint32_t get_image_data(int index, unsigned char **out);
 
 /**
  * Set the width of the resulting image in the module configuration.
@@ -144,7 +144,7 @@ void set_result_num_images(int num_images);
  * @param data Pointer to the image data
  * @param data_size Size of the image data
  */
-void append_result_image(unsigned char *data, size_t data_size);
+void append_result_image(unsigned char *data, uint32_t data_size);
 
 
 // ERROR REPORTING UTILITY FUNCTIONS //

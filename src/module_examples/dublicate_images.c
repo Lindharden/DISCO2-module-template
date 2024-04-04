@@ -17,12 +17,12 @@ void module()
     set_result_num_images(num_images * dubs_param);
 
     /* Example code for iterating a pixel value at a time */
-    for (size_t i = 0; i < num_images; ++i)
+    for (uint32_t i = 0; i < num_images; ++i)
     {
         unsigned char *input_image_data;
-        size_t image_size = get_image_data(i, &input_image_data);
+        uint32_t image_size = get_image_data(i, &input_image_data);
 
-        for (size_t j = 0; j < dubs_param; j++)
+        for (uint32_t j = 0; j < dubs_param; j++)
         {
             /* Append the image to the result batch */
             append_result_image(input_image_data, image_size);

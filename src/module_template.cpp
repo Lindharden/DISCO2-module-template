@@ -30,7 +30,7 @@ void module()
     for (int i = 0; i < num_images; ++i)
     {
         unsigned char *input_image_data;
-        size_t image_size = get_image_data(i, &input_image_data);
+        uint32_t image_size = get_image_data(i, &input_image_data);
 
         /* Define temporary output image */
         unsigned char *output_image_data = (unsigned char *)malloc(image_size);

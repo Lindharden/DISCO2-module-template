@@ -11,12 +11,12 @@
 
 void save_images(const char *filename_base, const ImageBatch *batch)
 {
-    size_t offset = 0;
+    uint32_t offset = 0;
     int image_index = 0;
     
     while (image_index < batch->num_images && offset < batch->batch_size) {
-        size_t image_size = *((size_t *)(batch->data + offset));
-        offset += sizeof(size_t); // Move the offset to the start of the image data
+        uint32_t image_size = *((uint32_t *)(batch->data + offset));
+        offset += sizeof(uint32_t); // Move the offset to the start of the image data
 
         char filename[20];
         sprintf(filename, "%s%d.png", filename_base, image_index);
@@ -46,8 +46,8 @@ void load_image(const char *filename, ImageBatch *batch, int num_images)
     batch->width = image_width;
     batch->channels = image_channels;
     batch->num_images = num_images;
-    size_t image_size = image_height * image_width * image_channels;
-    size_t batch_size = (image_size + sizeof(size_t)) * num_images;
+    uint32_t image_size = image_height * image_width * image_channels;
+    uint32_t batch_size = (image_size + sizeof(uint32_t)) * num_images;
     batch->data = (unsigned char*)malloc(batch_size);
 
     if (batch->data == NULL)
@@ -57,10 +57,10 @@ void load_image(const char *filename, ImageBatch *batch, int num_images)
     }
     batch->batch_size = batch_size;
     int offset = 0;
-    for (size_t i = 0; i < num_images; i++)
+    for (uint32_t i = 0; i < num_images; i++)
     {
-        memcpy(batch->data + offset, &image_size, sizeof(size_t));
-        offset += sizeof(size_t);
+        memcpy(batch->data + offset, &image_size, sizeof(uint32_t));
+        offset += sizeof(uint32_t);
         memcpy(batch->data + offset, image_data, image_size);
         offset += image_size;
     }

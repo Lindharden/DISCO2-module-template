@@ -24,15 +24,15 @@ int get_input_num_images()
     return input->num_images;
 }
 
-size_t get_image_data(int index, unsigned char **out)
+uint32_t get_image_data(int index, unsigned char **out)
 {
-    size_t offset = 0;
+    uint32_t offset = 0;
     int image_index = 0;
 
     while (image_index < input->num_images && offset < input->batch_size)
     {
-        size_t image_size = *((size_t *)(input->data + offset));
-        offset += sizeof(size_t); // Move the offset to the start of the image data
+        uint32_t image_size = *((uint32_t *)(input->data + offset));
+        offset += sizeof(uint32_t); // Move the offset to the start of the image data
 
         // Extract the image data
         if (image_index == index)
@@ -81,11 +81,11 @@ void set_result_num_images(int num_images)
     result->num_images = num_images;
 }
 
-void append_result_image(unsigned char *data, size_t data_size)
+void append_result_image(unsigned char *data, uint32_t data_size)
 {
     if (result->batch_size == 0)
     {
-        result->data = (unsigned char *)malloc(data_size + sizeof(size_t));
+        result->data = (unsigned char *)malloc(data_size + sizeof(uint32_t));
         
         if (result->data == NULL)
         {
@@ -94,7 +94,7 @@ void append_result_image(unsigned char *data, size_t data_size)
     }
     else
     {
-        unsigned char *tmp = (unsigned char *)realloc(result->data, result->batch_size + data_size + sizeof(size_t));
+        unsigned char *tmp = (unsigned char *)realloc(result->data, result->batch_size + data_size + sizeof(uint32_t));
 
         if (tmp == NULL) 
         {
@@ -108,8 +108,8 @@ void append_result_image(unsigned char *data, size_t data_size)
         return;
 
     unsigned char *ptr = result->data + result->batch_size;
-    memcpy(ptr, &data_size, sizeof(size_t));
-    ptr += sizeof(size_t); // insert after size
+    memcpy(ptr, &data_size, sizeof(uint32_t));
+    ptr += sizeof(uint32_t); // insert after size
     memcpy(ptr, data, data_size);
-    result->batch_size += data_size + sizeof(size_t);
+    result->batch_size += data_size + sizeof(uint32_t);
 }

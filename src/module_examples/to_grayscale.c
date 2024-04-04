@@ -24,8 +24,8 @@ void module()
     for (int i = 0; i < num_images; ++i)
     {
         unsigned char *input_image_data;
-        size_t input_image_size = get_image_data(i, &input_image_data);
-        size_t output_image_size = width * height;
+        uint32_t input_image_size = get_image_data(i, &input_image_data);
+        uint32_t output_image_size = width * height;
 
         /* Define temporary output image */
         unsigned char *output_image_data = (unsigned char *)malloc(output_image_size);

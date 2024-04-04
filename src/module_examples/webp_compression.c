@@ -10,7 +10,7 @@ void module()
     int stride = get_input_width() * sizeof(uint8_t) * 4; // amount of bytes per row
 
     /* Perform lossless compression for each image in the batch */
-    for (size_t img_index = 0; img_index < get_input_num_images(); img_index++)
+    for (uint32_t img_index = 0; img_index < get_input_num_images(); img_index++)
     {
         // Get input image data
         unsigned char *input_image_data;
@@ -18,7 +18,7 @@ void module()
 
         // Compress the image and create result data
         uint8_t *result_image_data = NULL;
-        size_t output_size = WebPEncodeLosslessRGBA(input_image_data, get_input_width(), get_input_height(), stride, &result_image_data);
+        uint32_t output_size = WebPEncodeLosslessRGBA(input_image_data, get_input_width(), get_input_height(), stride, &result_image_data);
 
         append_result_image(result_image_data, output_size);
 

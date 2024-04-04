@@ -22,7 +22,7 @@ void module()
     for (int i = 0; i < get_input_num_images(); ++i)
     {
         unsigned char *input_image_data;
-        size_t img_size = get_image_data(i, &input_image_data);
+        uint32_t img_size = get_image_data(i, &input_image_data);
         unsigned char *output_image_data = (unsigned char *)malloc(img_size);
         if (output_image_data == NULL)
         {
