@@ -12,29 +12,17 @@ c = meson.get_compiler('c')
 
 # opencv dependency
 # build c library like this: https://docs.opencv.org/4.x/d7/d9f/tutorial_linux_install.html
-# opencv_dep = declare_dependency(
-#     include_directories: include_directories('lib/opencv/include'),
-#     link_with: static_library('opencv4', 'lib/opencv/build/lib/libopencv_core.so')
+# opencv_dep = c.find_library(
+#     'libopencv_core', 
+#     dirs: meson.current_source_dir() + 'lib/opencv/build/lib', 
 # )
-# opencv_dep = dependency('opencv4')
-
-opencv_dep = c.find_library(
-    'libopencv_core', 
-    dirs: 'lib/opencv/build/lib', 
-    header_include_directories: include_directories('lib/opencv/include')
-)
+opencv_dep = dependency('opencv4')
 
 # tflite dependency
 # build c library like this: https://www.tensorflow.org/lite/guide/build_cmake#build_tensorflow_lite_c_library
-# tflite_dep = declare_dependency(
-#     include_directories: include_directories('lib/tensorflow'),  # Adjust the path as per your TensorFlow Lite installation
-#     link_with: static_library('tflite', 'lib/tensorflow/tflite_build/libtensorflowlite_c.so')  # Adjust the path as per your TensorFlow Lite installation
-# )
-
 tflite_dep = c.find_library(
     'libtensorflowlite_c', 
-    dirs: 'lib/tensorflow/tflite_build', 
-    header_include_directories: include_directories('lib/tensorflow')
+    dirs: meson.current_source_dir() + '/lib/tensorflow/tflite_build'
 )
 
 # Source files
@@ -49,7 +37,11 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
+
     'lib/libedgetpu/tflite/public',
+    'lib/tensorflow/',
+    'lib/tensorflow/tflite_build/flatbuffers/include',
+    # 'lib/opencv/include'
 )
 
 # Shared library (SO)
