@@ -10,14 +10,10 @@ enum ERROR_CODE {
 /* START MODULE IMPLEMENTATION */
 void module()
 {
-    /* Get metadata of input batch */
-    int width = get_input_width();
-    int height = get_input_height();
-    int channels = get_input_channels();
+    /* Get number of images in input batch */
     int num_images = get_input_num_images();
 
-    /* Set dimensions of output */
-    set_result_dimensions(width, height, channels);
+    /* Set number of images in output */
     set_result_num_images(num_images);
 
     /* Retrieve module parameters by name (defined in config.yaml) */
@@ -29,11 +25,26 @@ void module()
     /* Example code for iterating a pixel value at a time */
     for (int i = 0; i < num_images; ++i)
     {
+        Metadata *input_meta = get_metadata(i);
+        int size = input_meta->size;
+        int height = input_meta->height;
+        int width = input_meta->width;
+        int channels = input_meta->channels;
+        int timestamp = input_meta->timestamp;
+        int bits_pixel = input_meta->bits_pixel;
+        char *camera = input_meta->camera;
+
+        /* Get custom metadata values */
+        // int example_bool = get_custom_metadata_bool(input_meta, "example_bool");
+        // int int_example = get_custom_metadata_int(input_meta, "example_int");
+        // float example_float = get_custom_metadata_float(input_meta, "example_float");
+        // char *example_string = get_custom_metadata_string(input_meta, "example_string");
+        
         unsigned char *input_image_data;
-        uint32_t image_size = get_image_data(i, &input_image_data);
+        get_image_data(i, &input_image_data);
 
         /* Define temporary output image */
-        unsigned char *output_image_data = (unsigned char *)malloc(image_size);
+        unsigned char *output_image_data = (unsigned char *)malloc(size);
 
         /* Check for malloc error */
         if (output_image_data == NULL)
@@ -60,9 +71,25 @@ void module()
                 }
             }
         }
+        
+        /* Create image metadata before appending */
+        Metadata new_meta = METADATA__INIT;
+        new_meta.size = size;
+        new_meta.width = width;
+        new_meta.height = height;
+        new_meta.channels = channels;
+        new_meta.timestamp = timestamp;
+        new_meta.bits_pixel = bits_pixel;
+        new_meta.camera = camera;
+
+        /* Add custom metadata key-value */
+        add_custom_metadata_bool(&new_meta, "example_bool", true);
+        add_custom_metadata_int(&new_meta, "example_int", 20);
+        add_custom_metadata_float(&new_meta, "example_float", 20.5);
+        add_custom_metadata_string(&new_meta, "example_string", "TEST");
 
         /* Append the image to the result batch */
-        append_result_image(output_image_data, image_size);
+        append_result_image(output_image_data, size, &new_meta);
 
         /* Remember to free any allocated memory */
         free(input_image_data);
@@ -80,6 +107,7 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_li
     input = input_batch;
     config = module_parameter_list;
     error_pipe = ipc_error_pipe;
+    unpack_metadata();
 
     module();
 

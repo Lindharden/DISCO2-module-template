@@ -24,9 +24,6 @@ The `ImageBatch` struct looks as follows:
 ```c
 typedef struct ImageBatch {
     long mtype;          /* message type to read from the message queue */
-    int height;          /* height of images */
-    int width;           /* width of images */
-    int channels;        /* channels of images */
     int num_images;      /* amount of images */
     int batch_size;      /* size of the image batch */
     int shm_key;         /* key to shared memory segment of image data */
@@ -35,7 +32,7 @@ typedef struct ImageBatch {
 } ImageBatch;
 ```
 
-The `ImageBatch` struct serves as a container for a collection of images, containing metadata such as their dimensions (height, width) and color channels. It also holds information regarding shared memory allocation and the specific pipeline that should be employed for processing (not important for development). The struct's data field sequentially stores the image data, with each individual image prefaced by its size—a numerical prefix detailing the byte count of the image's data. This organization facilitates the delineation and access of images within a continuous memory space.
+The `ImageBatch` struct serves as a container for a collection of images, containing metadata such as number of images, batch size, and more. It also holds information regarding shared memory allocation and the specific pipeline that should be employed for processing (not important for development). The struct's data field sequentially stores the image data, with each individual image prefaced by its metadata (described below), and the size of the metadata. This organization facilitates the delineation and access of images within a continuous memory space.
 
 ### Important Consideration for Input and Result Batches
 It's imperative to note that the input ImageBatch should remain unaltered and modifications are exclusively reserved for the result batch, facilitated through the provided utility functions.
@@ -48,31 +45,54 @@ To access specific images within the batch, the `get_image_data` function can be
 
 Developers can iterate through the batch by incrementally advancing an index, from 0 up to the total number of images in the back (num_images - 1), using `get_image_data` at each step.
 
-
 ### Utility Functions
 
-Several utility functions is implemented to faciliate interaction and manipulation of both the input and resulting image batch, encapsulated within `batch_util.c`. These functions are divided into two distinct categories: getters for querying properties of the input ImageBatch and setters/manipulation functions for altering the state of the resulting image batch (result). 
+Several utility functions are implemented to faciliate interaction and manipulation of both the input and resulting image batch, encapsulated within `src/include/utils/util.h`.
 
-#### Input Batch Utilities
+#### Metadata and Image Utilities
 
-The utility functions for the input ImageBatch include:
+In order to read and manipulate image metadata (such as width, height or channels), the following metadata struct should be utilized:
 
-- `get_input_width()`
-- `get_input_height()`
-- `get_input_channels()`
-- `get_input_num_images()`
-- `get_image_data(int index, unsigned char **out)`: Retrieves the data of an image at the specified index, allocating memory and returning the size of the image data.
+```c
+struct Metadata
+{
+  int32_t size;
+  int32_t height;
+  int32_t width;
+  int32_t channels;
+  int32_t timestamp;
+  int32_t bits_pixel;
+  int32_t image_offset;
+  char *camera;
+  MetadataItem **items;
+};
+```
 
-#### Result Batch Utilities
+To access one of the image metadata values, do as follows:
 
-For modifying the result batch, the utilities provide:
+```c
+Metadata *input_meta = get_metadata(i);
+int size = input_meta->size; // replace with desired value
+```
 
-- `set_result_width(int width)`
-- `set_result_height(int height)`
-- `set_result_channels(int channels)`
-- `set_result_dimensions(int width, int height, int channels)`: Sets the width, height, and number of channels of the result batch.
-- `set_result_num_images(int num_images)`: Adjusts the total number of images in the result batch.
-- `append_result_image(unsigned char *data, size_t data_size)`: Appends an image to the batch, including size prefixing.
+And before returning, all the metadata values should be set (and and updated if needed):
+
+```c
+Metadata new_meta = METADATA__INIT;
+new_meta.size = size; // set to desired values
+new_meta.width = width;
+new_meta.height = height;
+new_meta.channels = channels;
+new_meta.timestamp = timestamp;
+new_meta.bits_pixel = bits_pixel;
+new_meta.camera = camera;
+```
+
+Make sure to append the image, and its metadata before returning:
+
+```c
+append_result_image(output_image_data, size, &new_meta);
+```
 
 #### Error Utilities
 

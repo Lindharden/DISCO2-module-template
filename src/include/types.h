@@ -1,13 +1,11 @@
 #ifndef TYPES_H
 #define TYPES_H
 #include <stddef.h>
+#include "metadata.pb-c.h"
 
 typedef struct ImageBatch
 {
     long mtype;
-    int height;
-    int width;
-    int channels;
     int num_images;
     int batch_size;
     int shm_key;
@@ -41,5 +39,11 @@ typedef struct ModuleParameterList
     size_t n_parameters;
     ModuleParameter **parameters;
 } ModuleParameterList;
+
+typedef struct MetadataList
+{
+    size_t n_metadata;
+    Metadata **metadata;
+} MetadataList;
 
 #endif // TYPES_H

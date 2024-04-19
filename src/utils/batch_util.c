@@ -4,76 +4,20 @@ ImageBatch *input;
 ImageBatch *result;
 ModuleParameterList *config;
 
-int get_input_width()
-{
-    return input->width;
-}
-
-int get_input_height()
-{
-    return input->height;
-}
-
-int get_input_channels()
-{
-    return input->channels;
-}
-
 int get_input_num_images()
 {
     return input->num_images;
 }
 
-uint32_t get_image_data(int index, unsigned char **out)
+void get_image_data(int index, unsigned char **out)
 {
-    uint32_t offset = 0;
-    int image_index = 0;
-
-    while (image_index < input->num_images && offset < input->batch_size)
+    Metadata *image_meta = get_metadata(index);
+    *out = (unsigned char *)malloc(image_meta->size);
+    if (out == NULL)
     {
-        uint32_t image_size = *((uint32_t *)(input->data + offset));
-        offset += sizeof(uint32_t); // Move the offset to the start of the image data
-
-        // Extract the image data
-        if (image_index == index)
-        {
-            *out = (unsigned char *)malloc(image_size);
-
-            if (*out == NULL) {
-                signal_error_and_exit(100);
-            }
-
-            memcpy(*out, input->data + offset, image_size);
-            return image_size;
-        }
-
-        offset += image_size; // Move the offset to the start of the next image block
-
-        image_index++;
+        signal_error_and_exit(100);
     }
-    return 0;
-}
-
-void set_result_width(int width)
-{
-    result->width = width;
-}
-
-void set_result_height(int height)
-{
-    result->height = height;
-}
-
-void set_result_channels(int channels)
-{
-    result->channels = channels;
-}
-
-void set_result_dimensions(int width, int height, int channels)
-{
-    set_result_width(width);
-    set_result_height(height);
-    set_result_channels(channels);
+    memcpy(*out, input->data + image_meta->image_offset, image_meta->size);
 }
 
 void set_result_num_images(int num_images)
@@ -81,12 +25,17 @@ void set_result_num_images(int num_images)
     result->num_images = num_images;
 }
 
-void append_result_image(unsigned char *data, uint32_t data_size)
+void append_result_image(unsigned char *data, uint32_t data_size, Metadata *meta)
 {
+    /* Pack new metadata */
+    size_t meta_size = metadata__get_packed_size(meta);
+    uint8_t meta_buf[meta_size];
+    metadata__pack(meta, meta_buf);
+    size_t block_size = data_size + meta_size + sizeof(uint32_t);
     if (result->batch_size == 0)
     {
-        result->data = (unsigned char *)malloc(data_size + sizeof(uint32_t));
-        
+        result->data = (unsigned char *)malloc(block_size);
+
         if (result->data == NULL)
         {
             signal_error_and_exit(100);
@@ -94,9 +43,9 @@ void append_result_image(unsigned char *data, uint32_t data_size)
     }
     else
     {
-        unsigned char *tmp = (unsigned char *)realloc(result->data, result->batch_size + data_size + sizeof(uint32_t));
+        unsigned char *tmp = (unsigned char *)realloc(result->data, result->batch_size + block_size);
 
-        if (tmp == NULL) 
+        if (tmp == NULL)
         {
             signal_error_and_exit(101);
         }
@@ -107,9 +56,14 @@ void append_result_image(unsigned char *data, uint32_t data_size)
     if (result->data == NULL)
         return;
 
+    /* Insert meta size, then the metadata, then the image data */
     unsigned char *ptr = result->data + result->batch_size;
-    memcpy(ptr, &data_size, sizeof(uint32_t));
-    ptr += sizeof(uint32_t); // insert after size
+    memcpy(ptr, &meta_size, sizeof(uint32_t));
+    ptr += sizeof(uint32_t);
+    memcpy(ptr, meta_buf, meta_size);
+    ptr += meta_size;
     memcpy(ptr, data, data_size);
-    result->batch_size += data_size + sizeof(uint32_t);
+
+    result->batch_size += block_size;
+    result->num_images += 1;
 }

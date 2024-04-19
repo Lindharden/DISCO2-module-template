@@ -9,6 +9,7 @@ extern "C" {
 #include "types.h"
 #include "module.h"
 #include "globals.h"
+#include "metadata.pb-c.h"
 
 // PROTOBUF UTILITY FUNCTIONS //
 
@@ -62,28 +63,7 @@ char *get_param_string(const char *name);
 void finalize();
 
 
-// BATCH DATA UTILITY FUNCTIONS //
-
-/**
- * Fetch width of the input image from the module configuration.
- *
- * @return Width of the input image
- */
-int get_input_width();
-
-/**
- * Fetch height of the input image from the module configuration.
- *
- * @return Height of the input image
- */
-int get_input_height();
-
-/**
- * Fetch number of channels of the input image from the module configuration.
- *
- * @return Number of channels of the input image
- */
-int get_input_channels();
+// METADATA AND IMAGE DATA UTILITY FUNCTIONS //
 
 /**
  * Fetch number of images in the input batch from the module configuration.
@@ -97,39 +77,89 @@ int get_input_num_images();
  *
  * @param index Index of image
  * @param out Buffer to store image data in
- * @return Size of image data as uint32_t
  */
-uint32_t get_image_data(int index, unsigned char **out);
+void get_image_data(int index, unsigned char **out);
 
 /**
- * Set the width of the resulting image in the module configuration.
+ * Retrieves the metadata of an image at the specified index, allocating memory and returning the size of the metadata.
  *
- * @param width Width of the resulting image
+ * @param index Index of image
+ * @return Size of metadata
  */
-void set_result_width(int width);
+Metadata *get_metadata(int index);
 
 /**
- * Set the height of the resulting image in the module configuration.
- *
- * @param height Height of the resulting image
- */
-void set_result_height(int height);
+ * Unpack and cache metadata
+*/
+void unpack_metadata();
 
 /**
- * Set the number of channels of the resulting image in the module configuration.
+ * Add custom key-value pair to image metadata, of type bool
  *
- * @param channels Number of channels of the resulting image
+ * @param data Metadata that is to be added to
+ * @param key The name associated with the custom value
+ * @param val The boolean value to store
  */
-void set_result_channels(int channels);
+void add_custom_metadata_bool(Metadata *data, char *key, int val);
 
 /**
- * Set the dimensions (width, height, and channels) of the resulting image in the module configuration.
+ * Add custom key-value pair to image metadata, of type integer
  *
- * @param width Width of the resulting image
- * @param height Height of the resulting image
- * @param channels Number of channels of the resulting image
+ * @param data Metadata that is to be added to
+ * @param key The name associated with the custom value
+ * @param val The integer value to store
  */
-void set_result_dimensions(int width, int height, int channels);
+void add_custom_metadata_int(Metadata *data, char *key, int val);
+
+/**
+ * Add custom key-value pair to image metadata, of type float
+ *
+ * @param data Metadata that is to be added to
+ * @param key The name associated with the custom value
+ * @param val The float value to store
+ */
+void add_custom_metadata_float(Metadata *data, char *key, float val);
+
+/**
+ * Add custom key-value pair to image metadata, of type string
+ *
+ * @param data Metadata that is to be added to
+ * @param key The name associated with the custom value
+ * @param val The string value to store
+ */
+void add_custom_metadata_string(Metadata *data, char *key, char *val);
+
+/**
+ * Get custom metadata value of type bool
+ *
+ * @param data Metadata to get from
+ * @param key The name associated with the custom value
+ */
+int get_custom_metadata_bool(Metadata *data, char *key);
+
+/**
+ * Get custom metadata value of type int
+ *
+ * @param data Metadata to get from
+ * @param key The name associated with the custom value
+ */
+int get_custom_metadata_int(Metadata *data, char *key);
+
+/**
+ * Get custom metadata value of type float
+ *
+ * @param data Metadata to get from
+ * @param key The name associated with the custom value
+ */
+float get_custom_metadata_float(Metadata *data, char *key);
+
+/**
+ * Get custom metadata value of type string
+ *
+ * @param data Metadata to get from
+ * @param key The name associated with the custom value
+ */
+char *get_custom_metadata_string(Metadata *data, char *key);
 
 /**
  * Set the number of images in the resulting batch in the module configuration.
@@ -143,8 +173,9 @@ void set_result_num_images(int num_images);
  *
  * @param data Pointer to the image data
  * @param data_size Size of the image data
+ * @param new_meta Pointer to the metadata
  */
-void append_result_image(unsigned char *data, uint32_t data_size);
+void append_result_image(unsigned char *data, uint32_t data_size, Metadata *new_meta);
 
 
 // ERROR REPORTING UTILITY FUNCTIONS //
