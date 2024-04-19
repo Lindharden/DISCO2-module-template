@@ -83,7 +83,7 @@ void module()
         new_meta.camera = camera;
 
         /* Add custom metadata key-value */
-        add_custom_metadata_bool(&new_meta, "example_bool", true);
+        add_custom_metadata_bool(&new_meta, "example_bool", 1);
         add_custom_metadata_int(&new_meta, "example_int", 20);
         add_custom_metadata_float(&new_meta, "example_float", 20.5);
         add_custom_metadata_string(&new_meta, "example_string", "TEST");

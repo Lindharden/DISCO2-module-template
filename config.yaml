@@ -4,6 +4,18 @@
 #   float   = 4                #
 #   string  = 5                #
 
-- key: fail_case
+- key: param_name_1
+  type: 2
+  value: true
+
+- key: param_name_2
   type: 3
-  value: 11
+  value: 256
+
+- key: param_name_3
+  type: 4
+  value: 3.1415
+
+- key: param_name_4
+  type: 5
+  value: DISCO

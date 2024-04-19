@@ -1,20 +1,23 @@
-project('crash_and_burn', 'c', 'cpp')
-project_name = 'crash_and_burn'
+project('example', 'c', 'cpp')
+project_name = 'example'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # External dependencies
 m_dep = meson.get_compiler('c').find_library('m', required : false)
+proto_c_dep = dependency('libprotobuf-c', fallback: ['protobuf-c', 'proto_c_dep'])
 libyaml_dep = dependency('yaml-0.1')
 
 # Source files
 sources = [
-    'src/crash_and_burn.c', # module file (REMEMBER TO CHANGE!)
+    'src/module_template.c', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
     'src/utils/error_util.c',
+    'src/utils/metadata_util.c',
+    'src/utils/metadata.pb-c.c',
 ]
 
 dirs = include_directories(
@@ -26,7 +29,7 @@ dirs = include_directories(
 shared_library(project_name, sources,
     include_directories: dirs,
     c_args: cflags + ['-DSHARED_MEMORY=1'],
-    dependencies: []
+    dependencies: [proto_c_dep]
 )
 
 # Check whether we are cross-compiling or not
@@ -39,6 +42,6 @@ if not get_option('cross-compile')
     executable(project_name + '-exec', sources,
         include_directories: dirs,
         c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-        dependencies: [libyaml_dep, m_dep]
+        dependencies: [libyaml_dep, m_dep, proto_c_dep]
     )
 endif
