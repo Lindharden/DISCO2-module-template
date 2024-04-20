@@ -13,9 +13,6 @@ void module()
     /* Get number of images in input batch */
     int num_images = get_input_num_images();
 
-    /* Set number of images in output */
-    set_result_num_images(num_images);
-
     /* Retrieve module parameters by name (defined in config.yaml) */
     int param_1 = get_param_bool("param_name_1");
     int param_2 = get_param_int("param_name_2");
@@ -102,12 +99,7 @@ void module()
 ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
 {
     ImageBatch result_batch;
-    result = &result_batch;
-    result->batch_size = 0;
-    input = input_batch;
-    config = module_parameter_list;
-    error_pipe = ipc_error_pipe;
-    unpack_metadata();
+    initialize(input_batch, &result_batch, module_parameter_list, ipc_error_pipe);
 
     module();
 

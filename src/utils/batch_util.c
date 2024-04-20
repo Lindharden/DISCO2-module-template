@@ -20,11 +20,6 @@ void get_image_data(int index, unsigned char **out)
     memcpy(*out, input->data + image_meta->image_offset, image_meta->size);
 }
 
-void set_result_num_images(int num_images)
-{
-    result->num_images = num_images;
-}
-
 void append_result_image(unsigned char *data, uint32_t data_size, Metadata *meta)
 {
     /* Pack new metadata */
@@ -66,4 +61,16 @@ void append_result_image(unsigned char *data, uint32_t data_size, Metadata *meta
 
     result->batch_size += block_size;
     result->num_images += 1;
+}
+
+void initialize(ImageBatch *input_batch, ImageBatch *result_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
+{
+    result = result_batch;
+    result->batch_size = 0;
+    result->num_images = 0;
+    result->pipeline_id = input_batch->pipeline_id;
+    input = input_batch;
+    config = module_parameter_list;
+    error_pipe = ipc_error_pipe;
+    unpack_metadata();
 }

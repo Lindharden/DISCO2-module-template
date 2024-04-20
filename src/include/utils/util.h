@@ -162,13 +162,6 @@ float get_custom_metadata_float(Metadata *data, char *key);
 char *get_custom_metadata_string(Metadata *data, char *key);
 
 /**
- * Set the number of images in the resulting batch in the module configuration.
- *
- * @param num_images Number of images in the resulting batch
- */
-void set_result_num_images(int num_images);
-
-/**
  * Append an image to the resulting batch in the module configuration.
  *
  * @param data Pointer to the image data
@@ -176,6 +169,11 @@ void set_result_num_images(int num_images);
  * @param new_meta Pointer to the metadata
  */
 void append_result_image(unsigned char *data, uint32_t data_size, Metadata *new_meta);
+
+/**
+ * Initialize module globals
+*/
+void initialize(ImageBatch *input_batch, ImageBatch *result_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe);
 
 
 // ERROR REPORTING UTILITY FUNCTIONS //
