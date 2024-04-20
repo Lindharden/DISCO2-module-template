@@ -63,14 +63,10 @@ void append_result_image(unsigned char *data, uint32_t data_size, Metadata *meta
     result->num_images += 1;
 }
 
-void initialize(ImageBatch *input_batch, ImageBatch *result_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
+void initialize()
 {
-    result = result_batch;
     result->batch_size = 0;
     result->num_images = 0;
-    result->pipeline_id = input_batch->pipeline_id;
-    input = input_batch;
-    config = module_parameter_list;
-    error_pipe = ipc_error_pipe;
+    result->pipeline_id = input->pipeline_id;
     unpack_metadata();
 }

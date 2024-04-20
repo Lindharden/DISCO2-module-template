@@ -173,7 +173,7 @@ void append_result_image(unsigned char *data, uint32_t data_size, Metadata *new_
 /**
  * Initialize module globals
 */
-void initialize(ImageBatch *input_batch, ImageBatch *result_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe);
+void initialize();
 
 
 // ERROR REPORTING UTILITY FUNCTIONS //

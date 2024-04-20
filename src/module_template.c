@@ -99,7 +99,11 @@ void module()
 ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_list, int *ipc_error_pipe)
 {
     ImageBatch result_batch;
-    initialize(input_batch, &result_batch, module_parameter_list, ipc_error_pipe);
+    result = &result_batch;
+    input = input_batch;
+    config = module_parameter_list;
+    error_pipe = ipc_error_pipe;
+    initialize();
 
     module();
 
