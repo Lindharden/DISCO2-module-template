@@ -8,7 +8,8 @@ Start by creating a new repository from this template by clicking the "Use this 
 
 Install the following packages:
 ```
-sudo apt install build-essential libyaml-dev gcc meson ninja pkg-config gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+sudo apt install build-essential libyaml-dev gcc python3-pip pkg-config gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+sudo pip3 install meson ninja
 ```
 
 Rename the project inside the `meson.build` file, by editing the `project_name` variable and the project name. This name is used for the shared library files, and the test executable.
