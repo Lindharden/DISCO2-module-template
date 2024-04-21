@@ -1,14 +1,14 @@
-project('ml-module', 'c', 'cpp')
-project_name = 'ml-module'
+project('ml', 'c', 'cpp')
+project_name = 'ml'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # External dependencies
 m_dep = meson.get_compiler('c').find_library('m', required : false)
-proto_c_dep = meson.get_compiler('c').find_library('libprotobuf-c', required : false)
-tf_lite_dep = meson.get_compiler('c').find_library('tensorflow-lite', required : false)
-opencv_dep = meson.get_compiler('c').find_library('opencv', required : false)
+proto_c_dep = meson.get_compiler('c').find_library('libprotobuf-c', required : true)
+tf_lite_dep = meson.get_compiler('c').find_library('tensorflow-lite', required : true)
+opencv_dep = meson.get_compiler('c').find_library('opencv', required : true)
 
 # Source files
 sources = [
