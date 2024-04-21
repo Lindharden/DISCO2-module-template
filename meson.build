@@ -24,9 +24,6 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
-
-    'lib/tensorflow',
-    'lib/opencv/include',
 )
 
 # Shared library (SO)
