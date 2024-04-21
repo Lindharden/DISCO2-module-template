@@ -1,5 +1,10 @@
 #include "module.h"
 #include "util.h"
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/tools/gen_op_registration.h"
+#include "opencv2/opencv.hpp"
 
 /* Define custom error codes */
 enum ERROR_CODE {
@@ -40,8 +45,28 @@ void module()
         unsigned char *input_image_data;
         get_image_data(i, &input_image_data);
 
-        /* Define temporary output image */
-        unsigned char *output_image_data = (unsigned char *)malloc(size);
+        unsigned char *output_image_data; 
+        
+        // Ensure bits per pixel is compatible with OpenCV's CV_8U (8 bits unsigned) for simplicity
+        if(bits_pixel == 8 && (channels == 1 || channels == 3 || channels == 4)) {
+            int type;
+            if(channels == 1) type = CV_8UC1;
+            else if(channels == 3) type = CV_8UC3;
+            else if(channels == 4) type = CV_8UC4;
+
+            cv::Mat image(height, width, type, input_image_data);
+
+            cv::Mat greyImage;
+            cv::cvtColor(image, grayImage, cv::COLOR_BGR2GRAY);
+
+            int outputSize = grayImage.rows * grayImage.cols;
+            output_image_data = (unsigned char *)malloc(outputSize);
+
+            memcopy(output_image_data, grayImage.data, outputSize);
+
+        } else {
+            std::cerr << "Unsupported image format." << std::endl;
+        }
 
         /* Check for malloc error */
         if (output_image_data == NULL)
@@ -49,29 +74,12 @@ void module()
             signal_error_and_exit(MALLOC_ERR);
         }
 
-        for (int y = 0; y < height; ++y)
-        {
-            for (int x = 0; x < width; ++x)
-            {
-                for (int c = 0; c < channels; ++c)
-                {
-                    /* Accessing pixel data for image i, at position (x, y) and channel c */
-                    int pixel_index = y * (width * channels) +
-                                      x * channels + c;
-                    unsigned char pixel_value = input_image_data[pixel_index];
+        std::unique_ptr<tflite::Interpreter> interpreter = std::make_unique<tflite::Interpreter>();
+        std::cout << "test" << interpreter->tensors_size() << std::endl;
 
-                    /* Perform any processing here */
-                    /* Example: You can manipulate pixel_value or perform any operation */
-
-                    /* If you want to write back processed value, you can do something like this: */
-                    output_image_data[pixel_index] = pixel_value;
-                }
-            }
-        }
-        
         /* Create image metadata before appending */
         Metadata new_meta = METADATA__INIT;
-        new_meta.size = size;
+        new_meta.size = outputSize;
         new_meta.width = width;
         new_meta.height = height;
         new_meta.channels = channels;
@@ -86,7 +94,7 @@ void module()
         add_custom_metadata_string(&new_meta, "example_string", "TEST");
 
         /* Append the image to the result batch */
-        append_result_image(output_image_data, size, &new_meta);
+        append_result_image(output_image_data, outputSize, &new_meta);
 
         /* Remember to free any allocated memory */
         free(input_image_data);
