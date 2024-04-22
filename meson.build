@@ -4,9 +4,8 @@ project_name = 'example'
 # Compiler and linker flags
 cflags = ['-Wall']
 
-# External dependencies
-m_dep = meson.get_compiler('c').find_library('m', required : false)
-proto_c_dep = meson.get_compiler('c').find_library('libprotobuf-c', required : false)
+# Dependencies
+proto_c_dep = meson.get_compiler('c').find_library('protobuf-c', required : false)
 
 # Source files
 sources = [
@@ -31,13 +30,14 @@ shared_library(project_name, sources,
     dependencies: [proto_c_dep]
 )
 
-# Check whether we are cross-compiling or not
+# Check for cross-compiling
 if not get_option('cross-compile')
     # If not cross-compiling, include the executable target
     sources += 'src/test.c'
     sources += 'src/utils/yaml_parser.c'
 
     libyaml_dep = dependency('yaml-0.1')
+    m_dep = meson.get_compiler('c').find_library('m', required : false)
 
     # Executable
     executable(project_name + '-exec', sources,
