@@ -1,6 +1,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdint.h>
+#include <errno.h>
 #include "util.h"
 
 void finalize() {
@@ -22,9 +23,15 @@ void finalize() {
         // Resize is needed: Utilize new unique shared memory ID for storing the batch        
         int new_shmid = -1;
         key_t new_key = input->shm_key;
+        // Continously try keys for new shared memory segments
         while (new_shmid == -1) {
-            // Continously try keys for new shared memory segments
-            new_shmid = shmget(++new_key, result->batch_size, IPC_CREAT | IPC_EXCL | 0666);
+            if ((new_shmid = shmget(++new_key, result->batch_size, IPC_CREAT | IPC_EXCL | 0666)) != -1) 
+                break;
+
+            if (errno == EEXIST) 
+                continue;
+
+            signal_error_and_exit(300);
         }
         result->shm_key = new_key;
 
