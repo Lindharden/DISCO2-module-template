@@ -14,6 +14,12 @@ void module()
     /* Get number of images in input batch */
     int num_images = get_input_num_images();
 
+    int effort = get_param_int("effort");
+    int resampling = get_param_int("resampling");
+    float distance = get_param_float("distance");
+
+    JxlEncoderStatus status;
+
     /* Example code for iterating a pixel value at a time */
     for (int i = 0; i < num_images; ++i)
     {
@@ -31,17 +37,23 @@ void module()
 
         JxlEncoder* encoder = JxlEncoderCreate(NULL);    
         JxlEncoderFrameSettings* settings = JxlEncoderFrameSettingsCreate(encoder, NULL);
+        
+        status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_EFFORT, effort);
+        status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_RESAMPLING, resampling);
+        status = JxlEncoderSetFrameDistance(settings, distance);
 
         JxlBasicInfo basic_info;
         JxlEncoderInitBasicInfo(&basic_info);
         basic_info.xsize = width;
         basic_info.ysize = height;
-        basic_info.num_color_channels = channels;
+        basic_info.num_color_channels = channels - 1;
+        basic_info.num_extra_channels = 1;
         basic_info.bits_per_sample = bits_pixel;
+        basic_info.alpha_bits = 8;
 
         JxlPixelFormat format = {channels, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
-        JxlEncoderSetBasicInfo(encoder, &basic_info);
-        JxlEncoderAddImageFrame(settings, &format, input_image_data, size);
+        status = JxlEncoderSetBasicInfo(encoder, &basic_info);
+        status = JxlEncoderAddImageFrame(settings, &format, input_image_data, size);
 
         JxlEncoderCloseInput(encoder);
 
@@ -49,7 +61,7 @@ void module()
         size_t out_buf_remain = output_buffer_size;
         uint8_t* output_buffer = (uint8_t *)malloc(output_buffer_size);
         uint8_t* out_buf_next = output_buffer;
-        JxlEncoderStatus res = JxlEncoderProcessOutput(encoder, &out_buf_next, &out_buf_remain);
+        status = JxlEncoderProcessOutput(encoder, &out_buf_next, &out_buf_remain);
         
         /* Create image metadata before appending */
         Metadata new_meta = METADATA__INIT;

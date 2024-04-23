@@ -1,5 +1,5 @@
-project('jpegxl', 'c', 'cpp')
-project_name = 'jpegxl'
+project('encoder', 'c', 'cpp')
+project_name = 'encoder'
 
 # Compiler and linker flags
 cflags = ['-Wall']
@@ -11,7 +11,7 @@ jxl_dep = dependency('libjxl', version: '>= 0.7.0')
 
 # Source files
 sources = [
-    'src/jpegxl.c', # module file (REMEMBER TO CHANGE!)
+    'src/encoder.c', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',

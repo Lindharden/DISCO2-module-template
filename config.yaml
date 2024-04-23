@@ -4,18 +4,14 @@
 #   float   = 4                #
 #   string  = 5                #
 
-- key: param_name_1
-  type: 2
-  value: true
-
-- key: param_name_2
+- key: effort
   type: 3
-  value: 256
+  value: 1
 
-- key: param_name_3
+- key: resampling
+  type: 3
+  value: 4
+
+- key: distance
   type: 4
-  value: 3.1415
-
-- key: param_name_4
-  type: 5
-  value: DISCO
+  value: 25
