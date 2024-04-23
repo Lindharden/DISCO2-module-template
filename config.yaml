@@ -6,12 +6,12 @@
 
 - key: effort
   type: 3
-  value: 1
+  value: 10
 
 - key: resampling
   type: 3
-  value: 4
+  value: 1
 
 - key: distance
   type: 4
-  value: 25
+  value: 0

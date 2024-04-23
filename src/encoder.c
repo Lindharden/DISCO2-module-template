@@ -40,10 +40,14 @@ void module()
         
         status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_EFFORT, effort);
         status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_RESAMPLING, resampling);
-        status = JxlEncoderSetFrameDistance(settings, distance);
+
+        int lossless = distance == 0;
+        if (lossless) status = JxlEncoderSetFrameLossless(settings, JXL_TRUE);
+        else status = JxlEncoderSetFrameDistance(settings, distance);
 
         JxlBasicInfo basic_info;
         JxlEncoderInitBasicInfo(&basic_info);
+        if (lossless) basic_info.uses_original_profile = JXL_TRUE;
         basic_info.xsize = width;
         basic_info.ysize = height;
         basic_info.num_color_channels = channels - 1;
