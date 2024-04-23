@@ -36,18 +36,16 @@ void module()
         JxlEncoderInitBasicInfo(&basic_info);
         basic_info.xsize = width;
         basic_info.ysize = height;
-        basic_info.num_color_channels = channels - 1;
-        basic_info.num_extra_channels = 1;
+        basic_info.num_color_channels = channels;
         basic_info.bits_per_sample = bits_pixel;
-        basic_info.alpha_bits = 8;
 
-        JxlPixelFormat format = {4, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
+        JxlPixelFormat format = {channels, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
         JxlEncoderSetBasicInfo(encoder, &basic_info);
         JxlEncoderAddImageFrame(settings, &format, input_image_data, size);
 
         JxlEncoderCloseInput(encoder);
 
-        size_t output_buffer_size = 1000 * 1000;
+        size_t output_buffer_size = 1000 * 1000 * 10;
         size_t out_buf_remain = output_buffer_size;
         uint8_t* output_buffer = (uint8_t *)malloc(output_buffer_size);
         uint8_t* out_buf_next = output_buffer;
