@@ -4,8 +4,13 @@
 
 /* Define custom error codes */
 enum ERROR_CODE {
-    MALLOC_ERR = 1,
-    PLACEHOLDER = 2,
+    JXL_ENC_ENCODER_CREATE,
+    JXL_ENC_SET_OPTIONS,
+    JXL_ENC_SET_LOSSLESS,
+    JXL_ENC_SET_DISTANCE,
+    JXL_ENC_SET_INFO,
+    JXL_ENC_ADD_IMAGE,
+    JXL_ENC_PROCESS,
 };
 
 /* START MODULE IMPLEMENTATION */
@@ -17,8 +22,7 @@ void module()
     int effort = get_param_int("effort");
     int resampling = get_param_int("resampling");
     float distance = get_param_float("distance");
-
-    JxlEncoderStatus status;
+    int lossless = distance == 0;
 
     /* Example code for iterating a pixel value at a time */
     for (int i = 0; i < num_images; ++i)
@@ -35,55 +39,72 @@ void module()
         unsigned char *input_image_data;
         get_image_data(i, &input_image_data);
 
-        JxlEncoder* encoder = JxlEncoderCreate(NULL);    
+        JxlEncoder* encoder = JxlEncoderCreate(NULL);
+
+        if (encoder == NULL)
+            signal_error_and_exit(JXL_ENC_ENCODER_CREATE);
+
         JxlEncoderFrameSettings* settings = JxlEncoderFrameSettingsCreate(encoder, NULL);
         
-        status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_EFFORT, effort);
-        status = JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_RESAMPLING, resampling);
+        if (JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_EFFORT, effort))
+            signal_error_and_exit(JXL_ENC_SET_OPTIONS);
 
-        int lossless = distance == 0;
-        if (lossless) status = JxlEncoderSetFrameLossless(settings, JXL_TRUE);
-        else status = JxlEncoderSetFrameDistance(settings, distance);
+        if (JxlEncoderFrameSettingsSetOption(settings, JXL_ENC_FRAME_SETTING_RESAMPLING, resampling))
+            signal_error_and_exit(JXL_ENC_SET_OPTIONS);
 
+        if (lossless && JxlEncoderSetFrameLossless(settings, JXL_TRUE))
+            signal_error_and_exit(JXL_ENC_SET_LOSSLESS);
+
+        if (!lossless && JxlEncoderSetFrameDistance(settings, distance))
+            signal_error_and_exit(JXL_ENC_SET_DISTANCE);
+        
         JxlBasicInfo basic_info;
         JxlEncoderInitBasicInfo(&basic_info);
         if (lossless) basic_info.uses_original_profile = JXL_TRUE;
         basic_info.xsize = width;
         basic_info.ysize = height;
-        basic_info.num_color_channels = channels - 1;
-        basic_info.num_extra_channels = 1;
+        basic_info.num_color_channels = channels > 3 ? 3 : channels;
+        basic_info.num_extra_channels = channels - basic_info.num_color_channels;
         basic_info.bits_per_sample = bits_pixel;
-        basic_info.alpha_bits = 8;
+        basic_info.alpha_bits = bits_pixel;
 
         JxlPixelFormat format = {channels, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
-        status = JxlEncoderSetBasicInfo(encoder, &basic_info);
-        status = JxlEncoderAddImageFrame(settings, &format, input_image_data, size);
+
+        if (JxlEncoderSetBasicInfo(encoder, &basic_info))
+            signal_error_and_exit(JXL_ENC_SET_INFO);
+        
+        if (JxlEncoderAddImageFrame(settings, &format, input_image_data, size)) 
+            signal_error_and_exit(JXL_ENC_ADD_IMAGE);
 
         JxlEncoderCloseInput(encoder);
 
-        size_t output_buffer_size = 1000 * 1000 * 10;
+        size_t output_buffer_size = size;
         size_t out_buf_remain = output_buffer_size;
         uint8_t* output_buffer = (uint8_t *)malloc(output_buffer_size);
         uint8_t* out_buf_next = output_buffer;
-        status = JxlEncoderProcessOutput(encoder, &out_buf_next, &out_buf_remain);
-        
+        if (JxlEncoderProcessOutput(encoder, &out_buf_next, &out_buf_remain))
+            signal_error_and_exit(JXL_ENC_PROCESS);
+
+        int enc_size = output_buffer_size - out_buf_remain;
+
         /* Create image metadata before appending */
         Metadata new_meta = METADATA__INIT;
-        new_meta.size = size;
+        new_meta.size = enc_size;
         new_meta.width = width;
         new_meta.height = height;
         new_meta.channels = channels;
         new_meta.timestamp = timestamp;
         new_meta.bits_pixel = bits_pixel;
         new_meta.camera = camera;
+        add_custom_metadata_string(&new_meta, "enc", "jxl");
 
         /* Append the image to the result batch */
-        append_result_image(output_buffer, output_buffer_size - out_buf_remain, &new_meta);
+        append_result_image(output_buffer, enc_size, &new_meta);
 
         // Write encoded data to output file
         FILE* output_file = fopen("output.jxl", "wb");
 
-        fwrite(output_buffer, 1, output_buffer_size - out_buf_remain, output_file);
+        fwrite(output_buffer, 1, enc_size, output_file);
 
         fclose(output_file);
 
