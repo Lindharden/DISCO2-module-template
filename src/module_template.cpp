@@ -1,5 +1,6 @@
 #include "module.h"
 #include "util.h"
+#include <opencv2/opencv.hpp>
 
 /* Define custom error codes */
 enum ERROR_CODE {
@@ -12,12 +13,6 @@ void module()
 {
     /* Get number of images in input batch */
     int num_images = get_input_num_images();
-
-    /* Retrieve module parameters by name (defined in config.yaml) */
-    int param_1 = get_param_bool("param_name_1");
-    int param_2 = get_param_int("param_name_2");
-    float param_3 = get_param_float("param_name_3");
-    char *param_4 = get_param_string("param_name_4");
 
     /* Example code for iterating a pixel value at a time */
     for (int i = 0; i < num_images; ++i)
@@ -49,44 +44,23 @@ void module()
             signal_error_and_exit(MALLOC_ERR);
         }
 
-        for (int y = 0; y < height; ++y)
-        {
-            for (int x = 0; x < width; ++x)
-            {
-                for (int c = 0; c < channels; ++c)
-                {
-                    /* Accessing pixel data for image i, at position (x, y) and channel c */
-                    int pixel_index = y * (width * channels) +
-                                      x * channels + c;
-                    unsigned char pixel_value = input_image_data[pixel_index];
-
-                    /* Perform any processing here */
-                    /* Example: You can manipulate pixel_value or perform any operation */
-
-                    /* If you want to write back processed value, you can do something like this: */
-                    output_image_data[pixel_index] = pixel_value;
-                }
-            }
-        }
+        cv::Mat rawImage(height, width, CV_16UC1, input_image_data);
+        rawImage *= 16; // scale image to use 16 bits
+        cv::Mat demosaicedImage;
+        cv::cvtColor(rawImage, demosaicedImage, cv::COLOR_BayerRG2BGR);
         
         /* Create image metadata before appending */
         Metadata new_meta = METADATA__INIT;
-        new_meta.size = size;
-        new_meta.width = width;
-        new_meta.height = height;
-        new_meta.channels = channels;
+        new_meta.size = demosaicedImage.size().height*demosaicedImage.size().width*3;
+        new_meta.width = demosaicedImage.size().width;
+        new_meta.height = demosaicedImage.size().height;
+        new_meta.channels = 3;
         new_meta.timestamp = timestamp;
-        new_meta.bits_pixel = bits_pixel;
+        new_meta.bits_pixel = 8;
         new_meta.camera = camera;
 
-        /* Add custom metadata key-value */
-        add_custom_metadata_bool(&new_meta, "example_bool", true);
-        add_custom_metadata_int(&new_meta, "example_int", 20);
-        add_custom_metadata_float(&new_meta, "example_float", 20.5);
-        add_custom_metadata_string(&new_meta, "example_string", "TEST");
-
         /* Append the image to the result batch */
-        append_result_image(output_image_data, size, &new_meta);
+        append_result_image(demosaicedImage.data, new_meta.size, &new_meta);
 
         /* Remember to free any allocated memory */
         free(input_image_data);

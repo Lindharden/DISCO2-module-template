@@ -4,12 +4,9 @@ project_name = 'example'
 # Compiler and linker flags
 cflags = ['-Wall']
 
-# Dependencies
-proto_c_dep = meson.get_compiler('c').find_library('protobuf-c', required : false)
-
 # Source files
 sources = [
-    'src/module_template.c', # module file (REMEMBER TO CHANGE!)
+    'src/module_template.cpp', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
@@ -21,28 +18,40 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
+    'usr/include/opencv4'
 )
+
+libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
+base_path = join_paths(meson.current_source_dir(), 'usr')
+
+deps = []
+foreach lib_name : libs_you_need_to_link 
+    deps += meson.get_compiler('c').find_library(lib_name, dirs : [join_paths(base_path, 'lib')], )
+endforeach
 
 # Shared library (SO)
 shared_library(project_name, sources,
     include_directories: dirs,
     c_args: cflags + ['-DSHARED_MEMORY=1'],
-    dependencies: [proto_c_dep]
+    dependencies: deps
 )
 
-# Check for cross-compiling
+# Check whether we are cross-compiling or not
 if not get_option('cross-compile')
     # If not cross-compiling, include the executable target
     sources += 'src/test.c'
     sources += 'src/utils/yaml_parser.c'
 
-    libyaml_dep = dependency('yaml-0.1')
     m_dep = meson.get_compiler('c').find_library('m', required : false)
+    libyaml_dep = dependency('yaml-0.1')
+
+    deps += m_dep
+    deps += libyaml_dep
 
     # Executable
     executable(project_name + '-exec', sources,
         include_directories: dirs,
         c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-        dependencies: [libyaml_dep, m_dep, proto_c_dep]
+        dependencies: deps
     )
 endif
