@@ -5,4 +5,5 @@
 *.jxl
 *.jpg
 *.jpeg
+decoder
 builddir/*
