@@ -2,4 +2,7 @@
 .o
 .vscode
 *.png
+*.jxl
+*.jpg
+*.jpeg
 builddir/*
