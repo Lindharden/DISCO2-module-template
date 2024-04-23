@@ -1,15 +1,17 @@
-project('example', 'c', 'cpp')
-project_name = 'example'
+project('jpegxl', 'c', 'cpp')
+project_name = 'jpegxl'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # Dependencies
 proto_c_dep = meson.get_compiler('c').find_library('protobuf-c', required : false)
+jxl_dep = dependency('libjxl', version: '>= 0.7.0')
+
 
 # Source files
 sources = [
-    'src/module_template.c', # module file (REMEMBER TO CHANGE!)
+    'src/jpegxl.c', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
@@ -27,7 +29,7 @@ dirs = include_directories(
 shared_library(project_name, sources,
     include_directories: dirs,
     c_args: cflags + ['-DSHARED_MEMORY=1'],
-    dependencies: [proto_c_dep]
+    dependencies: [proto_c_dep, jxl_dep]
 )
 
 # Check for cross-compiling
@@ -43,6 +45,6 @@ if not get_option('cross-compile')
     executable(project_name + '-exec', sources,
         include_directories: dirs,
         c_args: cflags + ['-g', '-DSHARED_MEMORY=0'],
-        dependencies: [libyaml_dep, m_dep, proto_c_dep]
+        dependencies: [libyaml_dep, m_dep, proto_c_dep, jxl_dep]
     )
 endif
