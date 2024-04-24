@@ -18,10 +18,9 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
-    'usr/include/opencv4'
 )
 
-libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
+libs_you_need_to_link = ['protobuf-c']
 base_path = join_paths(meson.current_source_dir(), 'usr')
 
 deps = []
