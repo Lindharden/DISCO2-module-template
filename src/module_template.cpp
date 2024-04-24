@@ -49,22 +49,28 @@ void module()
             signal_error_and_exit(MALLOC_ERR);
         }
 
-        for (int y = 0; y < height; ++y)
+        /* Calculate how many bytes we have per pixel */
+        uint bytes = bits_pixel/8;
+        if(bytes%8)bytes++; // round up if less than 1 byte
+
+        uint bwidth = width*bytes;
+
+        for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < width; ++x)
+            for (int x = 0; x < bwidth; x++)
             {
-                for (int c = 0; c < channels; ++c)
+                for (int c = 0; c < channels; c++)
                 {
-                    /* Accessing pixel data for image i, at position (x, y) and channel c */
-                    int pixel_index = y * (width * channels) +
-                                      x * channels + c;
-                    unsigned char pixel_value = input_image_data[pixel_index];
+                    /* Accessing pixel byte data for image i, at position (x, y) and channel c */
+                    int byte_index = y * (bwidth * channels) +
+                                    x * channels + c;
+                    unsigned char byte_value = input_image_data[byte_index];
 
                     /* Perform any processing here */
-                    /* Example: You can manipulate pixel_value or perform any operation */
+                    /* Example: You can manipulate byte_value or perform any operation */
 
                     /* If you want to write back processed value, you can do something like this: */
-                    output_image_data[pixel_index] = pixel_value;
+                    output_image_data[byte_index] = byte_value;
                 }
             }
         }
