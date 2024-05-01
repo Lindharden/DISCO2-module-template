@@ -125,8 +125,10 @@ static MetadataItem *allocate_metadata_item(Metadata *data, char *key)
     {
         signal_error_and_exit(100);
     }
+    MetadataItem item = METADATA_ITEM__INIT;
+    *data->items[data->n_items] = item;
     data->items[data->n_items]->key = strdup(key);
-    return data->items[data->n_items];
+    return data->items[data->n_items++];
 }
 
 void add_custom_metadata_bool(Metadata *data, char *key, int val)
