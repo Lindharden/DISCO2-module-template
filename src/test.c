@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
     ImageBatch result = run(&batch, &module_parameter_list, NULL);
 
-    save_images(FILENAME_OUTPUT, &result);
+    // save_images(FILENAME_OUTPUT, &result);
     free(module_parameter_list.parameters);
     free(result.data);
     return 0;

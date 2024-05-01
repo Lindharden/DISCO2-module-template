@@ -2,4 +2,8 @@
 .o
 .vscode
 *.png
+*.jxl
+*.jpg
+*.jpeg
+decoder
 builddir/*

@@ -34,4 +34,6 @@ fi
 # Navigate to the build directory and build the project
 ninja -C builddir
 
+gcc -g -o decoder decoder.c -Isrc/include/utils -ljxl
+
 exit 0

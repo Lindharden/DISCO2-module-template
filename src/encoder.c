@@ -66,7 +66,7 @@ void module()
         basic_info.num_color_channels = channels > 3 ? 3 : channels;
         basic_info.num_extra_channels = channels - basic_info.num_color_channels;
         basic_info.bits_per_sample = bits_pixel;
-        basic_info.alpha_bits = bits_pixel;
+        basic_info.alpha_bits = basic_info.num_extra_channels > 0 ? bits_pixel : 0;
 
         JxlPixelFormat format = {channels, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
 
@@ -100,13 +100,6 @@ void module()
 
         /* Append the image to the result batch */
         append_result_image(output_buffer, enc_size, &new_meta);
-
-        // Write encoded data to output file
-        FILE* output_file = fopen("output.jxl", "wb");
-
-        fwrite(output_buffer, 1, enc_size, output_file);
-
-        fclose(output_file);
 
         /* Remember to free any allocated memory */
         free(input_image_data);
