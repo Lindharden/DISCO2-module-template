@@ -23,7 +23,6 @@ void module()
     for (int i = 0; i < num_images; ++i)
     {
         Metadata *input_meta = get_metadata(i);
-        int size = input_meta->size;
         int height = input_meta->height;
         int width = input_meta->width;
         int channels = input_meta->channels;
@@ -38,7 +37,7 @@ void module()
         // char *example_string = get_custom_metadata_string(input_meta, "example_string");
         
         unsigned char *input_image_data;
-        get_image_data(i, &input_image_data);
+        size_t size = get_image_data(i, &input_image_data);
 
         /* Define temporary output image */
         unsigned char *output_image_data = (unsigned char *)malloc(size);

@@ -77,8 +77,9 @@ int get_input_num_images();
  *
  * @param index Index of image
  * @param out Buffer to store image data in
+ * @return Size of image data
  */
-void get_image_data(int index, unsigned char **out);
+size_t get_image_data(int index, unsigned char **out);
 
 /**
  * Retrieves the metadata of an image at the specified index, allocating memory and returning the size of the metadata.
