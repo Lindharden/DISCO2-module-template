@@ -38,8 +38,8 @@ void module()
         // char *example_string = get_custom_metadata_string(input_meta, "example_string");
         
         unsigned char *input_image_data;
-        get_image_data(i, &input_image_data);
-
+        size_t size = get_image_data(i, &input_image_data);
+        
         /* Define temporary output image */
         unsigned char *output_image_data = (unsigned char *)malloc(size);
 
