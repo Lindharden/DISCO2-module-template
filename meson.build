@@ -1,12 +1,12 @@
-project('example', 'c', 'cpp')
-project_name = 'example'
+project('crash', 'c', 'cpp')
+project_name = 'crash'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # Source files
 sources = [
-    'src/module_template.cpp', # module file (REMEMBER TO CHANGE!)
+    'src/crash_and_burn.c', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
