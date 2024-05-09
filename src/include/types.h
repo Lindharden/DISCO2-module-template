@@ -8,7 +8,7 @@ typedef struct ImageBatch
     long mtype;
     int num_images;
     int batch_size;
-    int shmid;
+    int shm_key;
     int pipeline_id;
     unsigned char *data;
 } ImageBatch;
