@@ -14,6 +14,7 @@ typedef enum FAIL_CASE
     EXCEEDING_MEMORY_ALLOCATION,
     DOUBLE_FREE,
     BUFFER_OVERFLOW,
+    SHM_INCREASE_OVERFLOW,
 } FAIL_CASE;
 
 typedef void (*FuncPtr)();
@@ -85,7 +86,28 @@ void module()
         char buffer[10];
         strcpy(buffer, "This string is more than 10 characters.");
         break;
+    case SHM_INCREASE_OVERFLOW:
+        Metadata *input_meta = get_metadata(0);
+        Metadata new_meta = METADATA__INIT;
+        new_meta.size = input_meta->size;
+        new_meta.width = input_meta->width;
+        new_meta.height = input_meta->height;
+        new_meta.channels = input_meta->channels;
+        new_meta.timestamp = input_meta->timestamp;
+        new_meta.bits_pixel = input_meta->bits_pixel;
+        new_meta.camera = input_meta->camera;
+
+        unsigned char * image_data;
+        uint32_t image_size = get_image_data(0, &image_data);
+        printf("Increased image batch to size: %d...\n", input->batch_size + image_size);
+        for (int i = 0; i < get_input_num_images() + 1; i++)
+        {
+            append_result_image(image_data, image_size, &new_meta);
+        }
+        free(image_data);   
+        break;     
     default:
+        printf("'fail_case' not recognized\n");
         break;
     }
 }
@@ -100,7 +122,6 @@ ImageBatch run(ImageBatch *input_batch, ModuleParameterList *module_parameter_li
     config = module_parameter_list;
     error_pipe = ipc_error_pipe;
     initialize();
-
     module();
 
     finalize();
