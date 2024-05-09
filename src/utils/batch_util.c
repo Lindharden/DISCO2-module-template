@@ -1,4 +1,5 @@
 #include "util.h"
+#include <sys/shm.h>
 
 ImageBatch *input;
 ImageBatch *result;
@@ -69,5 +70,11 @@ void initialize()
     result->batch_size = 0;
     result->num_images = 0;
     result->pipeline_id = input->pipeline_id;
+    void *shmaddr = shmat(input->shmid, NULL, 0);
+    if (shmaddr == NULL)
+    {
+        signal_error_and_exit(303);
+    }
+    input->data = shmaddr;
     unpack_metadata();
 }
