@@ -18,12 +18,6 @@ void module()
     {
         Metadata *input_meta = get_metadata(i);
         
-        /* Get custom metadata values */
-        // int example_bool = get_custom_metadata_bool(input_meta, "example_bool");
-        // int int_example = get_custom_metadata_int(input_meta, "example_int");
-        // float example_float = get_custom_metadata_float(input_meta, "example_float");
-        // char *example_string = get_custom_metadata_string(input_meta, "example_string");
-        
         unsigned char *input_image_data;
         size_t size = get_image_data(i, &input_image_data);
 
