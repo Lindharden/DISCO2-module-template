@@ -1,12 +1,12 @@
-project('example', 'c', 'cpp')
-project_name = 'example'
+project('demosaic', 'c', 'cpp')
+project_name = 'demosaic'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # Source files
 sources = [
-    'src/module_template.cpp', # module file (REMEMBER TO CHANGE!)
+    'src/demosaic.cpp', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
@@ -18,9 +18,10 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
+    'usr/include/opencv4'
 )
 
-libs_you_need_to_link = ['protobuf-c']
+libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
 base_path = join_paths(meson.current_source_dir(), 'usr')
 
 deps = []
