@@ -65,16 +65,21 @@ void append_result_image(unsigned char *data, uint32_t data_size, Metadata *meta
     result->num_images += 1;
 }
 
-void initialize()
+static void attach()
 {
-    result->batch_size = 0;
-    result->num_images = 0;
-    result->pipeline_id = input->pipeline_id;
     void *shmaddr = shmat(input->shmid, NULL, 0);
     if (shmaddr == NULL)
     {
         signal_error_and_exit(303);
     }
     input->data = shmaddr;
+}
+
+void initialize()
+{
+    result->batch_size = 0;
+    result->num_images = 0;
+    result->pipeline_id = input->pipeline_id;
+    if (SHARED_MEMORY) attach();
     unpack_metadata();
 }
