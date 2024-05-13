@@ -1,6 +1,6 @@
 # DISCO2-module-template
 
-Follow this guide for developing a module for the DISCO2 Image Processing Pipeline.
+Follow this guide for developing a module for the [DISCO2 Image Processing Pipeline](https://github.com/Lindharden/DIPP).
 
 Start by creating a new repository from this template by clicking the "Use this template" button at the top-right of the GitHub page.
 
