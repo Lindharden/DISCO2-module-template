@@ -16,7 +16,16 @@ void finalize() {
     size_t shm_size = info.shm_segsz;
     
     if (result->batch_size > shm_size) {
-        // Resize is needed: Utilize new unique shared memory ID for storing the batch        
+        // Resize is needed: Utilize new unique shared memory ID for storing the batch
+
+        // Detach and free old shared memory segment
+        if (shmdt(input->data) == -1) {
+            signal_error_and_exit(301);
+        }
+        if (shmctl(input->shmid, IPC_RMID, NULL) == -1) {
+            signal_error_and_exit(302);
+        }
+        
         int new_shmid = -1;
         struct timespec time;
         // Continously try keys for new shared memory segments
@@ -41,14 +50,7 @@ void finalize() {
 
         memcpy(shmaddr, result->data, result->batch_size);
         free(result->data);
-
-        // Detach and free old shared memory segment
-        if (shmdt(input->data) == -1) {
-            signal_error_and_exit(301);
-        }
-        if (shmctl(input->shmid, IPC_RMID, NULL) == -1) {
-            signal_error_and_exit(302);
-        }
+        
         if (shmdt(shmaddr) == -1) {
             signal_error_and_exit(301);
         }
