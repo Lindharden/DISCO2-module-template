@@ -99,7 +99,14 @@ void module()
 
         unsigned char * image_data;
         uint32_t image_size = get_image_data(0, &image_data);
-        printf("Increased image batch to size: %d...\n", input->batch_size + image_size);
+
+        /* Write new image size */
+        uint32_t new_size = input->batch_size + image_size;
+        printf("Increased image batch to size: %d...\n", new_size);
+        FILE *fh = fopen("size_increase.txt", "a+");
+        fprintf(fh, "%d\n", new_size);
+        fclose(fh);
+
         for (int i = 0; i < get_input_num_images() + 1; i++)
         {
             append_result_image(image_data, image_size, &new_meta);
