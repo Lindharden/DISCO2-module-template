@@ -23,6 +23,12 @@ void module()
     for (int i = 0; i < num_images; ++i)
     {
         Metadata *input_meta = get_metadata(i);
+
+        /* Get custom metadata values */
+        // int example_bool = get_custom_metadata_bool(input_meta, "example_bool");
+        // int int_example = get_custom_metadata_int(input_meta, "example_int");
+        // float example_float = get_custom_metadata_float(input_meta, "example_float");
+        // char *example_string = get_custom_metadata_string(input_meta, "example_string");
         
         unsigned char *image_data;
         size_t size = get_image_data(i, &image_data);
