@@ -1,12 +1,12 @@
-project('demosaic', 'c', 'cpp')
-project_name = 'demosaic'
+project('detect', 'c', 'cpp')
+project_name = 'detect'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # Source files
 sources = [
-    'src/demosaic.cpp', # module file (REMEMBER TO CHANGE!)
+    'src/detect.cpp', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
@@ -18,16 +18,26 @@ sources = [
 dirs = include_directories(
     'src/include', 
     'src/include/utils',
-    'usr/include/opencv4'
+    'usr/include',
+    # 'usr/include/opencv4'
 )
 
-libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
+# For initial testing
+# https://github.com/karthickai/tflite/blob/master/05_TFLite_Image_Classification/main.cpp
+proto_c_dep = meson.get_compiler('c').find_library('protobuf-c', required : false)
+opencv_dep = dependency('opencv4')
+
+# libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
+libs_you_need_to_link = ['tensorflowlite']
 base_path = join_paths(meson.current_source_dir(), 'usr')
 
 deps = []
 foreach lib_name : libs_you_need_to_link 
     deps += meson.get_compiler('c').find_library(lib_name, dirs : [join_paths(base_path, 'lib')], )
 endforeach
+
+# For initial testing
+deps += [proto_c_dep, opencv_dep]
 
 # Shared library (SO)
 shared_library(project_name, sources,
