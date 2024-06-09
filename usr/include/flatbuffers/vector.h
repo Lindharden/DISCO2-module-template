@@ -56,24 +56,12 @@ struct VectorIterator {
     return data_ == other.data_;
   }
 
-  bool operator!=(const VectorIterator &other) const {
-    return data_ != other.data_;
-  }
-
   bool operator<(const VectorIterator &other) const {
     return data_ < other.data_;
   }
 
-  bool operator>(const VectorIterator &other) const {
-    return data_ > other.data_;
-  }
-
-  bool operator<=(const VectorIterator &other) const {
-    return !(data_ > other.data_);
-  }
-
-  bool operator>=(const VectorIterator &other) const {
-    return !(data_ < other.data_);
+  bool operator!=(const VectorIterator &other) const {
+    return data_ != other.data_;
   }
 
   difference_type operator-(const VectorIterator &other) const {
