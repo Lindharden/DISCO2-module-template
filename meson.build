@@ -1,12 +1,12 @@
-project('detect', 'c', 'cpp')
-project_name = 'detect'
+project('classify', 'c', 'cpp')
+project_name = 'classify'
 
 # Compiler and linker flags
 cflags = ['-Wall']
 
 # Source files
 sources = [
-    'src/detect.cpp', # module file (REMEMBER TO CHANGE!)
+    'src/classify.cpp', # module file (REMEMBER TO CHANGE!)
     'src/utils/memory_util.c',
     'src/utils/config_util.c',
     'src/utils/batch_util.c',
