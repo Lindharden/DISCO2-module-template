@@ -13,7 +13,7 @@
 std::vector<std::string> load_labels(const std::string& labels_file) {
     std::ifstream file(labels_file.c_str());
     if (!file.is_open()) {
-        fprintf(stderr, "unable to open label file\n");
+        fprintf(stderr, "Unable to open label file\n");
         exit(-1);
     }
     std::string label_str;
@@ -37,13 +37,13 @@ void print_label(const std::vector<std::pair<float, int>>& top_results, const st
 
 /* START MODULE IMPLEMENTATION */
 void module() {
-    const char* modelFileName = "models/mobilenet_v1_1.0_224_quant.tflite";
-    const char* labelsFileName = "models/labels_mobilenet_quant_v1_224.txt";
+    const char* modelFileName = "models/model.tflite";
+    const char* labelsFileName = "models/labels.txt";
 
     // Load Model
     std::unique_ptr<tflite::FlatBufferModel> model = tflite::FlatBufferModel::BuildFromFile(modelFileName);
     if (model == nullptr) {
-        fprintf(stderr, "failed to load model\n");
+        fprintf(stderr, "Failed to load model\n");
         exit(-1);
     }
 
@@ -90,20 +90,30 @@ void module() {
         auto input_width = interpreter->tensor(input)->dims->data[2];
         auto input_channels = interpreter->tensor(input)->dims->data[3];
 
-        // Load Input Image (SOMETHING GOES WRONG HERE)
-        cv::Mat image(height, width, (channels == 3) ? CV_8UC3 : CV_8UC1, input_image_data);
+        // Load Input Image
+        cv::Mat image(height, width, (channels == 3) ? CV_8UC3 : CV_8UC4, input_image_data);
         if (image.empty()) {
-            fprintf(stderr, "Failed to load image\n");
-            exit(-1);
+            fprintf(stderr, "Failed to load image");
         }
 
         // Resize and copy image to input tensor
         cv::Mat resized_image;
         cv::resize(image, resized_image, cv::Size(input_width, input_height), cv::INTER_NEAREST);
-        memcpy(interpreter->typed_input_tensor<unsigned char>(0), resized_image.data, resized_image.total() * resized_image.elemSize());
+
+        // Ensure correct data type is used for the input tensor
+        auto input_tensor = interpreter->typed_tensor<uint8_t>(input);
+        if (input_tensor == nullptr) {
+            fprintf(stderr, "Failed to get input tensor\n");
+            exit(-1);
+        }
+
+        memcpy(input_tensor, resized_image.data, resized_image.total() * resized_image.elemSize());
 
         // Inference
-        interpreter->Invoke();
+        if (interpreter->Invoke() != kTfLiteOk) {
+            fprintf(stderr, "Failed to invoke interpreter\n");
+            exit(-1);
+        }
 
         // Get Output
         int output = interpreter->outputs()[0];
@@ -120,7 +130,7 @@ void module() {
                 tflite::label_image::get_top_n<uint8_t>(interpreter->typed_output_tensor<uint8_t>(0), output_size, 1, threshold, &top_results, kTfLiteUInt8);
                 break;
             default:
-                fprintf(stderr, "cannot handle output type\n");
+                fprintf(stderr, "Cannot handle output type\n");
                 exit(-1);
         }
 
