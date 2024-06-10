@@ -6,7 +6,7 @@
 #include "yaml_parser.h"
 #include "metadata.pb-c.h"
 
-#define FILENAME_INPUT "input.png"
+#define FILENAME_INPUT "lion.jpg"
 #define FILENAME_OUTPUT "output"
 #define FILENAME_CONFIG "config.yaml"
 
@@ -45,7 +45,8 @@ void save_images(const char *filename_base, const ImageBatch *batch)
 void load_image(const char *filename, ImageBatch *batch, int num_images)
 {
     int image_width, image_height, image_channels;
-    unsigned char *image_data = stbi_load(filename, &image_width, &image_height, &image_channels, STBI_rgb_alpha);
+    unsigned char *image_data = stbi_load(filename, &image_width, &image_height, &image_channels, STBI_rgb);
+    image_channels = 3; // TF model only supports 3 channels
     batch->num_images = num_images;
     uint32_t image_size = image_height * image_width * image_channels;
     Metadata new_meta = METADATA__INIT;
