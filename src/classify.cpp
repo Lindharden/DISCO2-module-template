@@ -9,6 +9,7 @@
 #include "tensorflow/lite/string_util.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
 #include "tensorflow/lite/model.h"
+#include "libedgetpu/tflite/public/edgetpu.h"
 
 std::vector<std::string> load_labels(const std::string& labels_file) {
     std::ifstream file(labels_file.c_str());
@@ -35,10 +36,28 @@ void print_label(const std::vector<std::pair<float, int>>& top_results, const st
     }
 }
 
+std::unique_ptr<tflite::Interpreter> BuildEdgeTpuInterpreter(
+    const tflite::FlatBufferModel& model,
+    edgetpu::EdgeTpuContext* edgetpu_context) {
+  tflite::ops::builtin::BuiltinOpResolver resolver;
+  resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
+  std::unique_ptr<tflite::Interpreter> interpreter;
+  if (tflite::InterpreterBuilder(model, resolver)(&interpreter) != kTfLiteOk) {
+    std::cerr << "Failed to build interpreter." << std::endl;
+  }
+  // Bind given context with interpreter.
+  interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
+  interpreter->SetNumThreads(1);
+  if (interpreter->AllocateTensors() != kTfLiteOk) {
+    std::cerr << "Failed to allocate tensors." << std::endl;
+  }
+  return interpreter;
+}
+
 /* START MODULE IMPLEMENTATION */
 void module() {
-    const char* modelFileName = "models/model.tflite";
-    const char* labelsFileName = "models/labels.txt";
+    const char* modelFileName = "models/edgetpu-model.tflite";
+    const char* labelsFileName = "models/edgetpu-labels.txt";
 
     // Load Model
     std::unique_ptr<tflite::FlatBufferModel> model = tflite::FlatBufferModel::BuildFromFile(modelFileName);
@@ -47,23 +66,13 @@ void module() {
         exit(-1);
     }
 
-    // Initiate Interpreter
-    std::unique_ptr<tflite::Interpreter> interpreter;
-    tflite::ops::builtin::BuiltinOpResolver resolver;
-    tflite::InterpreterBuilder(*model.get(), resolver)(&interpreter);
-    if (interpreter == nullptr) {
-        fprintf(stderr, "Failed to initiate the interpreter\n");
-        exit(-1);
-    }
+    // Create EdgeTPU Context
+    std::shared_ptr<edgetpu::EdgeTpuContext> edgetpu_context = 
+        edgetpu::EdgeTpuManager::GetSingleton()->OpenDevice();
 
-    if (interpreter->AllocateTensors() != kTfLiteOk) {
-        fprintf(stderr, "Failed to allocate tensor\n");
-        exit(-1);
-    }
-
-    // Configure the interpreter
-    interpreter->SetAllowFp16PrecisionForFp32(true);
-    interpreter->SetNumThreads(1);
+    // Initiate Interpreter for EdgeTPU
+    std::unique_ptr<tflite::Interpreter> model_interpreter =
+        BuildEdgeTpuInterpreter(*model, edgetpu_context.get());
 
     // Load Labels
     std::vector<std::string> labels = load_labels(labelsFileName);
@@ -85,10 +94,10 @@ void module() {
         size_t size = get_image_data(i, &input_image_data);
 
         // Get Input Tensor Dimensions
-        int input = interpreter->inputs()[0];
-        auto input_height = interpreter->tensor(input)->dims->data[1];
-        auto input_width = interpreter->tensor(input)->dims->data[2];
-        auto input_channels = interpreter->tensor(input)->dims->data[3];
+        int input = model_interpreter->inputs()[0];
+        auto input_height = model_interpreter->tensor(input)->dims->data[1];
+        auto input_width = model_interpreter->tensor(input)->dims->data[2];
+        auto input_channels = model_interpreter->tensor(input)->dims->data[3];
 
         // Load Input Image
         cv::Mat image(height, width, (channels == 3) ? CV_8UC3 : CV_8UC4, input_image_data);
@@ -101,7 +110,7 @@ void module() {
         cv::resize(image, resized_image, cv::Size(input_width, input_height), cv::INTER_NEAREST);
 
         // Ensure correct data type is used for the input tensor
-        auto input_tensor = interpreter->typed_tensor<uint8_t>(input);
+        auto input_tensor = model_interpreter->typed_tensor<uint8_t>(input);
         if (input_tensor == nullptr) {
             fprintf(stderr, "Failed to get input tensor\n");
             exit(-1);
@@ -110,24 +119,24 @@ void module() {
         memcpy(input_tensor, resized_image.data, resized_image.total() * resized_image.elemSize());
 
         // Inference
-        if (interpreter->Invoke() != kTfLiteOk) {
+        if (model_interpreter->Invoke() != kTfLiteOk) {
             fprintf(stderr, "Failed to invoke interpreter\n");
             exit(-1);
         }
 
         // Get Output
-        int output = interpreter->outputs()[0];
-        TfLiteIntArray *output_dims = interpreter->tensor(output)->dims;
+        int output = model_interpreter->outputs()[0];
+        TfLiteIntArray *output_dims = model_interpreter->tensor(output)->dims;
         auto output_size = output_dims->data[output_dims->size - 1];
         std::vector<std::pair<float, int>> top_results;
         float threshold = 0.01f;
 
-        switch (interpreter->tensor(output)->type) {
+        switch (model_interpreter->tensor(output)->type) {
             case kTfLiteFloat32:
-                tflite::label_image::get_top_n<float>(interpreter->typed_output_tensor<float>(0), output_size, 1, threshold, &top_results, kTfLiteFloat32);
+                tflite::label_image::get_top_n<float>(model_interpreter->typed_output_tensor<float>(0), output_size, 1, threshold, &top_results, kTfLiteFloat32);
                 break;
             case kTfLiteUInt8:
-                tflite::label_image::get_top_n<uint8_t>(interpreter->typed_output_tensor<uint8_t>(0), output_size, 1, threshold, &top_results, kTfLiteUInt8);
+                tflite::label_image::get_top_n<uint8_t>(model_interpreter->typed_output_tensor<uint8_t>(0), output_size, 1, threshold, &top_results, kTfLiteUInt8);
                 break;
             default:
                 fprintf(stderr, "Cannot handle output type\n");
