@@ -27,6 +27,7 @@ dirs = include_directories(
 proto_c_dep = meson.get_compiler('c').find_library('protobuf-c', required : false)
 opencv_dep = dependency('opencv4')
 
+# TODO: Compile tensorflowlite for Aarch64
 # libs_you_need_to_link = ['protobuf-c', 'opencv_core', 'opencv_imgproc']
 libs_you_need_to_link = ['tensorflowlite']
 base_path = join_paths(meson.current_source_dir(), 'usr')
